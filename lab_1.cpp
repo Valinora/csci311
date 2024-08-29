@@ -30,7 +30,7 @@ void printStats(const vector<int> &v) {
   int min = 0b01111111111111111111111111111111;
 
   int max = -1;
-  int sum = 0;
+  float sum = 0;
   for (auto elem : v) {
     sum += elem;
     if (elem > max) {
@@ -39,9 +39,8 @@ void printStats(const vector<int> &v) {
     if (elem < min) {
       min = elem;
     }
-
-    std::cout << min << sum / v.size() << max << std::endl;
   }
+  std::cout << min << " " << sum / v.size() << " " << max << std::endl;
 }
 
 int sumMultiples(const vector<int> &v, int n) { return 0; }

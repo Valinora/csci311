@@ -137,12 +137,16 @@ int sumPrimesB(int n) {
 
 int sieveOfEratosthenes(int n) {
   vector<int> candidates = {};
+
   for (int i = 2; i < n; i++) {
     candidates.push_back(i);
   }
-  for (int i = 1; i < sqrt(n); i++) {
-    for (int j = 2; j * i < n; j++) {
-      candidates[i * j] = 0;
+
+  for (int i = 2; i <= sqrt(n); i++) {
+    if (candidates[i - 2] != 0) { // Check if i is not marked
+      for (int j = 2 * i; j < n; j += i) {
+        candidates[j - 2] = 0; // Mark multiples of i
+      }
     }
   }
 
@@ -268,8 +272,8 @@ void readIntVector(vector<int> &v, int n) {
 }
 
 /***************************************************************************************************
- * Testing run times of different approaches to finding the sum of prime numbers
- * under a threshold *
+ * Testing run times of different approaches to finding the sum of prime
+ * numbers under a threshold *
  * *************************************************************************************************/
 void timePrimes() {
   int sum = -1;

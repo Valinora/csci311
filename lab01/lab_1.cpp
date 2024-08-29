@@ -58,22 +58,12 @@ void printStats(const vector<int> &v) {
 }
 
 int sumMultiples(const vector<int> &v, int n) {
-  // TODO: Figure out how to better handle duplicates
   int sum = 0;
-  for (auto elem : v) {
-    for (int i = 1; i <= n; i++) {
-      if (elem * i >= n) {
+  for (int i = 1; i < n; i++) {
+    for (auto num : v) {
+      if (i % num == 0) {
+        sum += i;
         break;
-      }
-      sum += elem * i;
-    }
-  }
-
-  if (v.size() > 1) {
-
-    for (int i = 0; i < v.size(); i++) {
-      for (int j = i + 1; j < v.size(); j++) {
-        sum -= v[i] * v[j];
       }
     }
   }

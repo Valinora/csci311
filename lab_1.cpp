@@ -58,6 +58,7 @@ void printStats(const vector<int> &v) {
 }
 
 int sumMultiples(const vector<int> &v, int n) {
+  // TODO: Figure out how to better handle duplicates
   int sum = 0;
   for (auto elem : v) {
     for (int i = 1; i <= n; i++) {
@@ -92,16 +93,57 @@ void greaterThanK(vector<int> &v, int k) {
 }
 
 bool isSubarray(const vector<string> &a, const vector<string> &b) {
-  return false;
+  // For every character in b, iterate through a and check if the next a.size()
+  // characters in b match with a.
+  bool ret = false;
+  for (int i = 0; i < b.size(); i++) {
+    if (equal(a.begin(), a.end(), b.begin() + i)) {
+      ret = true;
+    }
+  }
+
+  return ret;
 }
 
-bool isPrimeA(int n) { return false; }
+bool isPrimeA(int n) {
+  bool prime = true;
+  for (int i = 2; i < n; i++) {
+    if (n % i == 0) {
+      prime = false;
+    }
+  }
+  return prime;
+}
 
-int sumPrimesA(int n) { return 0; }
+int sumPrimesA(int n) {
+  int sum = 0;
+  for (int i = 1; i <= n; i++) {
+    if (isPrimeA(i)) {
+      sum += i;
+    }
+  }
+  return sum;
+}
 
-bool isPrimeB(int n) { return false; }
+bool isPrimeB(int n) {
+  bool prime = true;
+  for (int i = 2; i < sqrt(n); i++) {
+    if (n % i == 0) {
+      prime = false;
+    }
+  }
+  return prime;
+}
 
-int sumPrimesB(int n) { return 0; }
+int sumPrimesB(int n) {
+  int sum = 0;
+  for (int i = 1; i <= n; i++) {
+    if (isPrimeA(i)) {
+      sum += i;
+    }
+  }
+  return sum;
+}
 
 int sieveOfEratosthenes(int n) { return 0; }
 

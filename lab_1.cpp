@@ -16,7 +16,21 @@ using namespace std;
 // Colin Jamison
 // 006627752
 
-int collatzLength(int n) { return 0; }
+int collatzLength(int n) {
+  int count = 0;
+  int prev = 0;
+  int curr = n;
+  while (curr != 1) {
+    count++;
+    prev = curr;
+    if ( curr % 2 == 0 ) {
+      curr = curr / 2;
+    } else {
+      curr = (3 * curr) + 1;
+    }
+  }
+  return count;
+}
 
 void printStats(const vector<int> &v) {
   if (v.size() == 0) {

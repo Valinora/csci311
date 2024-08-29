@@ -145,7 +145,26 @@ int sumPrimesB(int n) {
   return sum;
 }
 
-int sieveOfEratosthenes(int n) { return 0; }
+int sieveOfEratosthenes(int n) {
+  vector<int> candidates = {};
+  for (int i = 2; i < n; i++) {
+    candidates.push_back(i);
+  }
+  for (int i = 1; i < sqrt(n); i++) {
+    for (int j = 2; j * i < n; j++) {
+      candidates[i * j] = 0;
+    }
+  }
+
+  int sum = 0;
+  for (int i = 0; i < candidates.size(); i++) {
+    if (candidates[i] != 0) {
+      sum += candidates[i];
+    }
+  }
+
+  return sum;
+}
 
 /*************************************************************
  * Your solutions ends here and do not change anything below *

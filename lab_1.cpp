@@ -23,7 +23,7 @@ int collatzLength(int n) {
   while (curr != 1) {
     count++;
     prev = curr;
-    if ( curr % 2 == 0 ) {
+    if (curr % 2 == 0) {
       curr = curr / 2;
     } else {
       curr = (3 * curr) + 1;
@@ -57,9 +57,39 @@ void printStats(const vector<int> &v) {
   std::cout << min << " " << sum / v.size() << " " << max << std::endl;
 }
 
-int sumMultiples(const vector<int> &v, int n) { return 0; }
+int sumMultiples(const vector<int> &v, int n) {
+  int sum = 0;
+  for (auto elem : v) {
+    for (int i = 1; i <= n; i++) {
+      if (elem * i >= n) {
+        break;
+      }
+      sum += elem * i;
+    }
+  }
 
-void greaterThanK(vector<int> &v, int k) {}
+  if (v.size() > 1) {
+
+    for (int i = 0; i < v.size(); i++) {
+      for (int j = i + 1; j < v.size(); j++) {
+        sum -= v[i] * v[j];
+      }
+    }
+  }
+
+  return sum;
+}
+
+void greaterThanK(vector<int> &v, int k) {
+  auto iter = v.begin();
+  while (iter != v.end()) {
+    if ((*iter) <= k) {
+      v.erase(iter);
+    } else {
+      iter++;
+    }
+  }
+}
 
 bool isSubarray(const vector<string> &a, const vector<string> &b) {
   return false;

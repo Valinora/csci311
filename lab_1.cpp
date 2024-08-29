@@ -13,8 +13,8 @@ using namespace std;
  * Your solutions go below here and do not change the headers*
  * ***********************************************************/
 
-// Your name goes here
-// Your campus ID goes here
+// Colin Jamison
+// 006627752
 
 int collatzLength(int n) { return 0; }
 
@@ -23,6 +23,12 @@ void printStats(const vector<int> &v) {
     std::cout << "Empty vector" << std::endl;
     return;
   }
+
+  // Without changing headers to include climits I cannot use INT_MAX
+  // int min = INT_MAX;
+  // Signed INT_MAX
+  int min = 0b01111111111111111111111111111111;
+
   int max = -1;
   int sum = 0;
   for (auto elem : v) {
@@ -30,6 +36,11 @@ void printStats(const vector<int> &v) {
     if (elem > max) {
       max = elem;
     }
+    if (elem < min) {
+      min = elem;
+    }
+
+    std::cout << min << sum / v.size() << max << std::endl;
   }
 }
 

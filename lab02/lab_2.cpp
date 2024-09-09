@@ -44,7 +44,7 @@ int rSum(const vector<int> &v){
 }
 
 int rMaxHelper(const vector<int> &v, int start){
-  return 1;
+  return 0;
 }
 
 int rMax(const vector<int> &v){

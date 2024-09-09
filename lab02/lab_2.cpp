@@ -12,19 +12,35 @@ using namespace std;
  * ***********************************************************/
 
 int triangleNum(int n){
-  return 0;
+  if (n == 1) {
+    return 1;
+  }
+  return n + triangleNum(n - 1);
 }
 
 int rFib(int n){
-  return 0;
+  if (n == 0) {
+    return 0;
+  } else if (n == 1) {
+    return 1;
+  }
+
+  return rFib(n - 1) + rFib(n - 2);
 }
 
 int rSumHelper(const vector<int> &v, int i){
-  return 0;
+  if (i == 0) {
+    return v[i];
+  } else {
+    return v[i] + rSumHelper(v, i - 1);
+  }
 }
 
 int rSum(const vector<int> &v){
-  return 0;
+  if (v.size() == 0) {
+    return 0;
+  }
+  return rSumHelper(v, v.size()-1);
 }
 
 int rMaxHelper(const vector<int> &v, int start){

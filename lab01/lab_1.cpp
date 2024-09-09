@@ -42,9 +42,9 @@ void printStats(const vector<int> &v) {
   // int min = INT_MAX;
   // Signed INT_MAX
   int min = 0b01111111111111111111111111111111;
-
   int max = -1;
   float sum = 0;
+
   for (auto elem : v) {
     sum += elem;
     if (elem > max) {

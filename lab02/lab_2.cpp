@@ -106,7 +106,7 @@ int rBinarySearch(const vector<int> &v, int low, int high, int target) {
   if (v[mid] == target) {
     return mid;
   }
-  
+
   if (v[mid] > target) {
     // Search bottom half
     return rBinarySearch(v, low, mid - 1, target);

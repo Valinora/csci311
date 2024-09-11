@@ -118,7 +118,26 @@ int rBinarySearch(const vector<int> &v, int low, int high, int target) {
 
 }
 
-bool rSubsetSum(const vector<int> &v, int start, int target) { return 0; }
+// Hmmm....
+// Easy Cases:
+// Length of array is 0 or 1, and the single value does not match target
+// All positive values combined sum to less than target
+// Target is 0; empty subset is valid
+// Observations:
+// If we were only dealing with positive integers, we could easily exclude all values larger than our target.
+// For every element, it is either in the subset or it isn't.
+bool rSubsetSum(const vector<int> &v, int start, int target) {
+  if (target == 0) {
+    return true;
+  }
+  // No more elements to consider
+  if (start >= v.size()) {
+    return false;
+  }
+
+  // Check if a sum can be made based on inclusion || exclusion of current element
+  return rSubsetSum(v, start + 1, target - v[start]) || rSubsetSum(v, start + 1, target);
+}
 
 /***********************************************
  * Main and helper functions for quick testing *

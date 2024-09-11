@@ -69,7 +69,7 @@ bool isSorted(const vector<int> &v, int start, int end) {
   // A single element is always sorted
   if (start == end) {
     return true;
-  } else if (v.size() < 2) {
+  } else if (v.size() < 2 ) {
     return true;
   }
 
@@ -78,14 +78,44 @@ bool isSorted(const vector<int> &v, int start, int end) {
   } else {
     return false;
   }
+
 }
 
-bool isPalindromeHelper(string s, int start, int end) { return false; }
+bool isPalindromeHelper(string s, int start, int end) {
+  if (start >= end) {
+    return true;
+  }
+  // Check the start and finish
+  if (s[start] != s[end]) {
+    return false;
+  }
 
-bool isPalindrome(string s) { return false; }
+  // Meet in the middle
+  return isPalindromeHelper(s, start + 1, end - 1);
+}
+
+bool isPalindrome(string s) {
+  return isPalindromeHelper(s, 0, s.length() - 1);
+}
 
 int rBinarySearch(const vector<int> &v, int low, int high, int target) {
-  return 0;
+  if (low > high) {
+    return -1;
+  }
+  int mid = low + (high - low) / 2;
+  if (v[mid] == target) {
+    return mid;
+  }
+  
+  if (v[mid] > target) {
+    // Search bottom half
+    return rBinarySearch(v, low, mid - 1, target);
+  } else {
+    // Search top half
+    return rBinarySearch(v, mid + 1, high, target);
+  }
+
+
 }
 
 bool rSubsetSum(const vector<int> &v, int start, int target) { return 0; }

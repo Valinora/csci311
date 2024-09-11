@@ -65,7 +65,20 @@ int rMax(const vector<int> &v) {
   return rMaxHelper(v, v.size() - 1);
 }
 
-bool isSorted(const vector<int> &v, int start, int end) { return false; }
+bool isSorted(const vector<int> &v, int start, int end) {
+  // A single element is always sorted
+  if (start == end) {
+    return true;
+  } else if (v.size() < 2) {
+    return true;
+  }
+
+  if (v[start] <= v[start + 1]) {
+    return isSorted(v, start + 1, end);
+  } else {
+    return false;
+  }
+}
 
 bool isPalindromeHelper(string s, int start, int end) { return false; }
 

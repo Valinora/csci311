@@ -1,5 +1,5 @@
 // Lab 2 Skeleton
-// Author: *** YOUR NAME HERE ***
+// Author: Colin Jamison
 
 #include <iostream>
 #include <limits.h>

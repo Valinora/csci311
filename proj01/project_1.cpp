@@ -6,9 +6,11 @@
 #include <iostream>
 #include <vector>
 
+using std::vector;
+
 enum SORT_TYPE { BUBBLE, INSERTION, SELECTION, QUICK };
 
-bool is_sorted_helper(std::vector<int>& v, int start, int end) {
+bool is_sorted_helper(vector<int>& v, int start, int end) {
   if (start == end) {
     return true;
   } else if (v.size() < 2) {
@@ -22,17 +24,14 @@ bool is_sorted_helper(std::vector<int>& v, int start, int end) {
   }
 }
 
-bool is_sorted(std::vector<int>& v) {
-  return is_sorted_helper(v, 0, v.size() - 1);
-}
+bool is_sorted(vector<int>& v) { return is_sorted_helper(v, 0, v.size() - 1); }
 
-std::vector<int> bubble_sort(std::vector<int>& unsorted);
-std::vector<int> insertion_sort(std::vector<int>& unsorted);
-std::vector<int> selection_sort(std::vector<int>& unsorted);
-std::vector<int> quick_sort(std::vector<int>& unsorted);
+vector<int> bubble_sort(vector<int>& unsorted) { return vector<int>(0, 0); };
+vector<int> insertion_sort(vector<int>& unsorted) { return vector<int>(0, 0); }
+vector<int> selection_sort(vector<int>& unsorted) { return vector<int>(0, 0); }
+vector<int> quick_sort(vector<int> &unsorted) { return vector<int>(0, 0); }
 
-std::vector<int> random_vector(int size, int low, int high) {
-  using std::vector;
+vector<int> random_vector(int size, int low, int high) {
   vector v(size, 0);
   for (int i = 0; i < size; i++) {
     v[i] = rand() % (high - low + 1) + low;
@@ -40,7 +39,7 @@ std::vector<int> random_vector(int size, int low, int high) {
 
   return v;
 }
-void print_vector(std::vector<int>& v) {
+void print_vector(vector<int>& v) {
   for (unsigned int i = 0; i < v.size(); i++) {
     std::cout << v[i] << " ";
   }
@@ -48,9 +47,9 @@ void print_vector(std::vector<int>& v) {
   return;
 }
 
-std::chrono::duration<float> run_test(SORT_TYPE type, std::vector<int>& v) {
+std::chrono::duration<float> run_test(SORT_TYPE type, vector<int>& v) {
   using namespace std::chrono;
-  std::vector<int> out;
+  vector<int> out;
 
   time_point<system_clock> now;
 
@@ -86,6 +85,6 @@ std::chrono::duration<float> run_test(SORT_TYPE type, std::vector<int>& v) {
 
 int main(int argc, char** argv) {
   srand(time(NULL));
-  std::vector<int> v = random_vector(10, 0, 20);
+  vector<int> v = random_vector(10, 0, 20);
   print_vector(v);
 }

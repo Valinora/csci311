@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cstdint>
 #include <iostream>
+#include <stdfloat>
 #include <vector>
 
 using std::vector;
@@ -138,38 +139,38 @@ void print_vector(vector<int>& v) {
   return;
 }
 
-std::chrono::duration<float> run_test(SORT_TYPE type, vector<int>& v) {
+long double run_test(SORT_TYPE type, vector<int> v) {
   using namespace std::chrono;
   vector<int> out;
 
-  time_point<system_clock> now;
+  time_point<high_resolution_clock> start;
 
   switch (type) {
     case BUBBLE:
-      now = system_clock::now();
+      start = high_resolution_clock::now();
       out = bubble_sort(v);
       break;
     case INSERTION:
-      now = system_clock::now();
+      start = high_resolution_clock::now();
       out = insertion_sort(v);
       break;
     case SELECTION:
-      now = system_clock::now();
+      start = high_resolution_clock::now();
       out = selection_sort(v);
       break;
     case QUICK_FIRST:
-      now = system_clock::now();
+      start = high_resolution_clock::now();
       out = quick_sort_first(v);
       break;
     case QUICK_MIDDLE:
-      now = system_clock::now();
+      start = high_resolution_clock::now();
       out = quick_sort_middle(v);
       break;
     default:
       throw "Invalid SORT_TYPE";
   }
-
-  auto duration = now.time_since_epoch();
+  auto elapsed = high_resolution_clock::now() - start;
+  long double duration = duration_cast<microseconds>(elapsed).count();
 
   if (!is_sorted(out)) {
     throw "Received unsorted array out.";
@@ -178,9 +179,9 @@ std::chrono::duration<float> run_test(SORT_TYPE type, vector<int>& v) {
   return duration;
 }
 
-int main(int argc, char** argv) {
+int main() {
   srand(time(NULL));
-  vector<int> v = random_vector(10, 0, 20);
-  auto sorted = quick_sort_first(v);
-  print_vector(sorted);
+  vector<int> v = random_vector(1000, 0, 20);
+  auto time = run_test(QUICK_FIRST, v);
+  std::cout << "Quicksort took: " << time << " microseconds" << std::endl;
 }

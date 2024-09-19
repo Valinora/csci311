@@ -139,6 +139,15 @@ void print_vector(vector<int>& v) {
   return;
 }
 
+/**
+ * @brief Measures the time taken to sort a vector using the specified sorting algorithm.
+ * 
+ * @param type The sorting algorithm to use, specified by the SORT_TYPE enum.
+ * @param v The vector of integers to be sorted.
+ * @return long double The duration in microseconds taken to sort the vector.
+ * 
+ * @throws const char* If an invalid SORT_TYPE is provided or if the output vector is not sorted.
+ */
 long double run_test(SORT_TYPE type, vector<int> v) {
   using namespace std::chrono;
   vector<int> out;

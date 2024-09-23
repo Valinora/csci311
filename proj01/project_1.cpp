@@ -2,6 +2,7 @@
 #include <math.h>
 #include <time.h>
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <iostream>
@@ -44,6 +45,7 @@ vector<int> bubble_sort(vector<int> unsorted) {
   }
   return unsorted;
 };
+
 vector<int> insertion_sort(vector<int> unsorted) {
   uint64_t i = 1;
   while (i < unsorted.size()) {
@@ -56,6 +58,7 @@ vector<int> insertion_sort(vector<int> unsorted) {
   }
   return unsorted;
 }
+
 vector<int> selection_sort(vector<int> unsorted) {
   for (uint64_t i = 0; i < unsorted.size() - 1; i++) {
     int min = i;
@@ -131,6 +134,16 @@ vector<int> random_vector(int size, int low, int high) {
 
   return v;
 }
+
+vector<int> sorted_vector(int size) {
+  vector v(size, 0);
+
+  for (int i = 0; i < size; i++) {
+    v[i] = i;
+  }
+
+  return v;
+}
 void print_vector(vector<int>& v) {
   for (unsigned int i = 0; i < v.size(); i++) {
     std::cout << v[i] << " ";
@@ -140,13 +153,15 @@ void print_vector(vector<int>& v) {
 }
 
 /**
- * @brief Measures the time taken to sort a vector using the specified sorting algorithm.
- * 
+ * @brief Measures the time taken to sort a vector using the specified sorting
+ * algorithm.
+ *
  * @param type The sorting algorithm to use, specified by the SORT_TYPE enum.
  * @param v The vector of integers to be sorted.
  * @return long double The duration in microseconds taken to sort the vector.
- * 
- * @throws const char* If an invalid SORT_TYPE is provided or if the output vector is not sorted.
+ *
+ * @throws const char* If an invalid SORT_TYPE is provided or if the output
+ * vector is not sorted.
  */
 long double run_test(SORT_TYPE type, vector<int> v) {
   using namespace std::chrono;
@@ -178,19 +193,43 @@ long double run_test(SORT_TYPE type, vector<int> v) {
     default:
       throw "Invalid SORT_TYPE";
   }
-  auto elapsed = high_resolution_clock::now() - start;
-  long double duration = duration_cast<microseconds>(elapsed).count();
+  auto end = high_resolution_clock::now();
+  duration<long double, std::micro> duration = end - start;
 
   if (!is_sorted(out)) {
     throw "Received unsorted array out.";
   }
 
-  return duration;
+  return duration.count();
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " <sorting_algorithm>" << std::endl;
+    return -1;
+  }
+
+  SORT_TYPE alg_selection;
+
+  std::string arg = argv[1];
+  std::transform(arg.begin(), arg.end(), arg.begin(), ::tolower);
+  if (arg == "insertion") {
+    alg_selection = INSERTION;
+  } else if (arg == "selection") {
+    alg_selection = SELECTION;
+  } else if (arg == "quick_first") {
+    alg_selection = QUICK_FIRST;
+  } else if (arg == "quick_middle") {
+    alg_selection = QUICK_MIDDLE;
+  } else if (arg == "bubble") {
+    alg_selection = BUBBLE;
+  } else {
+    std::cerr << "Invalid sorting algorithm: " << arg << ". Expected one of: bubble, insertion, selection, quick_first, quick_middle." << std::endl;
+    return 1;
+  }
+
   srand(time(NULL));
   vector<int> v = random_vector(1000, 0, 20);
-  auto time = run_test(QUICK_FIRST, v);
-  std::cout << "Quicksort took: " << time << " microseconds" << std::endl;
+  auto time = run_test(alg_selection, v);
+  std::cout << "Sorting took: " << time << " microseconds" << std::endl;
 }

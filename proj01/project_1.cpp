@@ -14,8 +14,6 @@ using std::vector;
 
 enum SORT_TYPE { BUBBLE, INSERTION, SELECTION, QUICK_FIRST, QUICK_MIDDLE };
 
-const int RUN_SIZES[] = {10, 100, 1000, 5000, 10000};
-
 bool is_sorted_helper(vector<int>& v, int start, int end) {
   if (start == end) {
     return true;
@@ -216,6 +214,17 @@ enum SORT_CASE {
   SORTED_QUICK_MIDDLE,
 };
 
+/**
+ * @brief Runs a series of sorting tests and records the timings.
+ *
+ * @param type The type of sorting algorithm to use (SORT_TYPE).
+ * @param sort_case The initial configuration of the vector (SORT_CASE).
+ * @param num_runs The number of sorting runs to execute.
+ * @param run_size The size of the vector for each sorting run.
+ * @return A vector of long doubles containing the timing results for each run.
+ *
+ * @throws const char* If an invalid SORT_CASE is provided.
+ */
 vector<long double> run_battery(SORT_TYPE type, SORT_CASE sort_case, int num_runs, int run_size) {
   vector<long double> timings;
 

@@ -6,6 +6,8 @@
 #include <chrono>
 #include <cstdint>
 #include <iostream>
+#include <numeric>
+#include <stdexcept>
 #include <stdfloat>
 #include <vector>
 
@@ -215,23 +217,23 @@ enum SORT_CASE {
   SORTED_QUICK_MIDDLE,
 };
 
-vector<long double> run_battery(SORT_TYPE type, SORT_CASE sort_case) {
+vector<long double> run_battery(SORT_TYPE type, SORT_CASE sort_case, int num_runs, int run_size) {
   vector<long double> timings;
 
-  for (int i = 0; i < sizeof(RUN_SIZES) / sizeof(RUN_SIZES[0]); i++) {
+  for (int i = 0; i < num_runs; i++) {
     vector<int> v;
 
     switch (sort_case) {
       case SORTED:
       case SORTED_QUICK_MIDDLE:
-        v = sorted_vector(RUN_SIZES[i]);
+        v = sorted_vector(run_size);
         break;
       case REV_SORTED:
-        v = sorted_vector(RUN_SIZES[i]);
+        v = sorted_vector(run_size);
         std::reverse(v.begin(), v.end());
         break;
       case RANDOM:
-        v = random_vector(RUN_SIZES[i], 0, 100);
+        v = random_vector(run_size, 0, 100);
         break;
       default:
         throw "Invalid SORT_CASE provided";
@@ -243,58 +245,78 @@ vector<long double> run_battery(SORT_TYPE type, SORT_CASE sort_case) {
   return timings;
 }
 
-struct Args {
+class Args {
+ public:
   SORT_CASE sort_case;
   SORT_TYPE sort_type;
+
+  void parse_args(int argc, char* argv[]) {
+    if (argc < 3) {
+      std::cerr << "Usage: " << argv[0] << " <algorithm> <case>" << std::endl;
+      exit(1);
+    }
+
+    // Parse sorting algorithm
+    std::string alg_arg = argv[1];
+    std::transform(alg_arg.begin(), alg_arg.end(), alg_arg.begin(), ::tolower);
+    if (alg_arg == "insertion") {
+      this->sort_type = INSERTION;
+    } else if (alg_arg == "selection") {
+      this->sort_type = SELECTION;
+    } else if (alg_arg == "quick_first") {
+      this->sort_type = QUICK_FIRST;
+    } else if (alg_arg == "quick_middle") {
+      this->sort_type = QUICK_MIDDLE;
+    } else if (alg_arg == "bubble") {
+      this->sort_type = BUBBLE;
+    } else {
+      std::cerr << "Invalid sorting algorithm: " << alg_arg << ". Expected one of: bubble, insertion, selection, quick_first, quick_middle." << std::endl;
+      exit(1);
+    }
+
+    // Parse sorting case
+    std::string case_arg = argv[2];
+    std::transform(case_arg.begin(), case_arg.end(), case_arg.begin(), ::tolower);
+    if (case_arg == "sorted") {
+      this->sort_case = SORTED;
+    } else if (case_arg == "rev_sorted") {
+      this->sort_case = REV_SORTED;
+    } else if (case_arg == "random") {
+      this->sort_case = RANDOM;
+    } else {
+      std::cerr << "Invalid sorting case: " << case_arg << ". Expected one of: sorted, rev_sorted, random." << std::endl;
+      exit(1);
+    }
+  }
 };
 
-Args parse_args(int argc, char* argv[]) {
-  if (argc < 3) {
-    std::cerr << "Usage: " << argv[0] << " <algorithm> <case>" << std::endl;
-    exit(1);
+class TimingSummary {
+ public:
+  long double min;
+  long double max;
+  long double average;
+
+  TimingSummary(vector<long double> timings) {
+    if (timings.empty()) {
+      throw std::invalid_argument("Timings vector is empty.");
+    }
+
+    min = *std::min_element(timings.begin(), timings.end());
+    max = *std::max_element(timings.begin(), timings.end());
+    average = std::accumulate(timings.begin(), timings.end(), 0.0L) / timings.size();
   }
-
-  Args args;
-
-  // Parse sorting algorithm
-  std::string alg_arg = argv[1];
-  std::transform(alg_arg.begin(), alg_arg.end(), alg_arg.begin(), ::tolower);
-  if (alg_arg == "insertion") {
-    args.sort_type = INSERTION;
-  } else if (alg_arg == "selection") {
-    args.sort_type = SELECTION;
-  } else if (alg_arg == "quick_first") {
-    args.sort_type = QUICK_FIRST;
-  } else if (alg_arg == "quick_middle") {
-    args.sort_type = QUICK_MIDDLE;
-  } else if (alg_arg == "bubble") {
-    args.sort_type = BUBBLE;
-  } else {
-    std::cerr << "Invalid sorting algorithm: " << alg_arg << ". Expected one of: bubble, insertion, selection, quick_first, quick_middle." << std::endl;
-    exit(1);
-  }
-
-  // Parse sorting case
-  std::string case_arg = argv[2];
-  std::transform(case_arg.begin(), case_arg.end(), case_arg.begin(), ::tolower);
-  if (case_arg == "sorted") {
-    args.sort_case = SORTED;
-  } else if (case_arg == "rev_sorted") {
-    args.sort_case = REV_SORTED;
-  } else if (case_arg == "random") {
-    args.sort_case = RANDOM;
-  } else {
-    std::cerr << "Invalid sorting case: " << case_arg << ". Expected one of: sorted, rev_sorted, random." << std::endl;
-    exit(1);
-  }
-
-  return args;
-}
+};
 
 int main(int argc, char* argv[]) {
-  Args args = parse_args(argc, argv);
+  Args args;
+  args.parse_args(argc, argv);
 
   srand(time(NULL));
-  auto time = run_battery(args.sort_type, args.sort_case);
-  print_vector(time);
+  auto timings = run_battery(args.sort_type, args.sort_case, 100, 1000);
+  print_vector(timings);
+
+  TimingSummary summary(timings);
+  std::cout << "Min: " << summary.min << std::endl;
+  std::cout << "Max: " << summary.max << std::endl;
+  std::cout << "Average: " << summary.average << std::endl;
 }

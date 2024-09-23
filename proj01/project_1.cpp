@@ -13,6 +13,8 @@ using std::vector;
 
 enum SORT_TYPE { BUBBLE, INSERTION, SELECTION, QUICK_FIRST, QUICK_MIDDLE };
 
+const int RUN_SIZES[] = {10, 100, 1000, 5000, 10000};
+
 bool is_sorted_helper(vector<int>& v, int start, int end) {
   if (start == end) {
     return true;
@@ -144,12 +146,16 @@ vector<int> sorted_vector(int size) {
 
   return v;
 }
-void print_vector(vector<int>& v) {
+template <typename T>
+void print_vector(const vector<T>& v) {
+  std::cout << "{ ";
   for (unsigned int i = 0; i < v.size(); i++) {
-    std::cout << v[i] << " ";
+    std::cout << v[i];
+    if (i < v.size() - 1) {
+      std::cout << ", ";
+    }
   }
-  std::cout << std::endl;
-  return;
+  std::cout << " }" << std::endl;
 }
 
 /**
@@ -203,33 +209,93 @@ long double run_test(SORT_TYPE type, vector<int> v) {
   return duration.count();
 }
 
-int main(int argc, char* argv[]) {
-  if (argc < 2) {
-    std::cerr << "Usage: " << argv[0] << " <sorting_algorithm>" << std::endl;
-    return -1;
+enum SORT_CASE {
+  SORTED,
+  REV_SORTED,
+  RANDOM,
+  SORTED_QUICK_MIDDLE,
+};
+
+vector<long double> run_battery(SORT_TYPE type, SORT_CASE sort_case) {
+  vector<long double> timings;
+
+  for (int i = 0; i < sizeof(RUN_SIZES) / sizeof(RUN_SIZES[0]); i++) {
+    vector<int> v;
+
+    switch (sort_case) {
+      case SORTED:
+      case SORTED_QUICK_MIDDLE:
+        v = sorted_vector(RUN_SIZES[i]);
+        break;
+      case REV_SORTED:
+        v = sorted_vector(RUN_SIZES[i]);
+        std::reverse(v.begin(), v.end());
+        break;
+      case RANDOM:
+        v = random_vector(RUN_SIZES[i], 0, 100);
+        break;
+      default:
+        throw "Invalid SORT_CASE provided";
+    }
+
+    timings.push_back(run_test(type, v));
   }
 
-  SORT_TYPE alg_selection;
+  return timings;
+}
 
-  std::string arg = argv[1];
-  std::transform(arg.begin(), arg.end(), arg.begin(), ::tolower);
-  if (arg == "insertion") {
-    alg_selection = INSERTION;
-  } else if (arg == "selection") {
-    alg_selection = SELECTION;
-  } else if (arg == "quick_first") {
-    alg_selection = QUICK_FIRST;
-  } else if (arg == "quick_middle") {
-    alg_selection = QUICK_MIDDLE;
-  } else if (arg == "bubble") {
-    alg_selection = BUBBLE;
+struct Args {
+  SORT_CASE sort_case;
+  SORT_TYPE sort_type;
+};
+
+Args parse_args(int argc, char* argv[]) {
+  if (argc < 3) {
+    std::cerr << "Usage: " << argv[0] << " <algorithm> <case>" << std::endl;
+    exit(1);
+  }
+
+  Args args;
+
+  // Parse sorting algorithm
+  std::string alg_arg = argv[1];
+  std::transform(alg_arg.begin(), alg_arg.end(), alg_arg.begin(), ::tolower);
+  if (alg_arg == "insertion") {
+    args.sort_type = INSERTION;
+  } else if (alg_arg == "selection") {
+    args.sort_type = SELECTION;
+  } else if (alg_arg == "quick_first") {
+    args.sort_type = QUICK_FIRST;
+  } else if (alg_arg == "quick_middle") {
+    args.sort_type = QUICK_MIDDLE;
+  } else if (alg_arg == "bubble") {
+    args.sort_type = BUBBLE;
   } else {
-    std::cerr << "Invalid sorting algorithm: " << arg << ". Expected one of: bubble, insertion, selection, quick_first, quick_middle." << std::endl;
-    return 1;
+    std::cerr << "Invalid sorting algorithm: " << alg_arg << ". Expected one of: bubble, insertion, selection, quick_first, quick_middle." << std::endl;
+    exit(1);
   }
+
+  // Parse sorting case
+  std::string case_arg = argv[2];
+  std::transform(case_arg.begin(), case_arg.end(), case_arg.begin(), ::tolower);
+  if (case_arg == "sorted") {
+    args.sort_case = SORTED;
+  } else if (case_arg == "rev_sorted") {
+    args.sort_case = REV_SORTED;
+  } else if (case_arg == "random") {
+    args.sort_case = RANDOM;
+  } else {
+    std::cerr << "Invalid sorting case: " << case_arg << ". Expected one of: sorted, rev_sorted, random." << std::endl;
+    exit(1);
+  }
+
+  return args;
+}
+
+int main(int argc, char* argv[]) {
+  Args args = parse_args(argc, argv);
 
   srand(time(NULL));
-  vector<int> v = random_vector(1000, 0, 20);
-  auto time = run_test(alg_selection, v);
-  std::cout << "Sorting took: " << time << " microseconds" << std::endl;
+  auto time = run_battery(args.sort_type, args.sort_case);
+  print_vector(time);
 }

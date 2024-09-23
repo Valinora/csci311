@@ -1,14 +1,13 @@
 // Author: Colin Jamison 0006627752
-#include <math.h>
-#include <time.h>
-
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <iostream>
+#include <math.h>
 #include <numeric>
 #include <stdexcept>
 #include <stdfloat>
+#include <time.h>
 #include <vector>
 
 using std::vector;

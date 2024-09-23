@@ -148,14 +148,13 @@ vector<int> sorted_vector(int size) {
 }
 template <typename T>
 void print_vector(const vector<T>& v) {
-  std::cout << "{ ";
   for (unsigned int i = 0; i < v.size(); i++) {
     std::cout << v[i];
     if (i < v.size() - 1) {
       std::cout << ", ";
     }
   }
-  std::cout << " }" << std::endl;
+  std::cout << std::endl;
 }
 
 /**

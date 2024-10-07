@@ -1,12 +1,10 @@
 // Lab 3 - BST_skeleton.cpp - rename it to BST.cpp
 // Author: Colin Jamison
 
-#include "BST.h"
-
 #include <limits.h>
-
 #include <iostream>
 #include <vector>
+#include "BST.h"
 
 // ***do not change the headers***
 

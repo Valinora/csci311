@@ -112,6 +112,18 @@ void BST::preOrder(std::shared_ptr<Node> n, std::vector<std::shared_ptr<Node>>& 
     }
 }
 
-void BST::inOrder(std::shared_ptr<Node> n, std::vector<std::shared_ptr<Node>>& order) {}
+void BST::inOrder(std::shared_ptr<Node> n, std::vector<std::shared_ptr<Node>>& order) {
+    if (n != nullptr) {
+        inOrder(n->left, order);
+        order.push_back(n);
+        inOrder(n->right, order);
+    }
+}
 
-void BST::postOrder(std::shared_ptr<Node> n, std::vector<std::shared_ptr<Node>>& order) {}
+void BST::postOrder(std::shared_ptr<Node> n, std::vector<std::shared_ptr<Node>>& order) {
+    if (n != nullptr) {
+        postOrder(n->left, order);
+        postOrder(n->right, order);
+        order.push_back(n);
+    }
+}

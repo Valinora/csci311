@@ -1,13 +1,13 @@
 // Author: Colin Jamison 0006627752
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
+#include <ctime>
 #include <iostream>
-#include <math.h>
 #include <numeric>
 #include <stdexcept>
 #include <stdfloat>
-#include <time.h>
 #include <vector>
 
 using std::vector;
@@ -278,7 +278,8 @@ class Args {
     } else if (alg_arg == "bubble") {
       this->sort_type = BUBBLE;
     } else {
-      std::cerr << "Invalid sorting algorithm: " << alg_arg << ". Expected one of: bubble, insertion, selection, quick_first, quick_middle." << std::endl;
+      std::cerr << "Invalid sorting algorithm: " << alg_arg
+                << ". Expected one of: bubble, insertion, selection, quick_first, quick_middle." << std::endl;
       exit(1);
     }
 
@@ -292,7 +293,8 @@ class Args {
     } else if (case_arg == "random") {
       this->sort_case = RANDOM;
     } else {
-      std::cerr << "Invalid sorting case: " << case_arg << ". Expected one of: sorted, rev_sorted, random." << std::endl;
+      std::cerr << "Invalid sorting case: " << case_arg << ". Expected one of: sorted, rev_sorted, random."
+                << std::endl;
       exit(1);
     }
   }

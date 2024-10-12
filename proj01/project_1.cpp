@@ -167,30 +167,36 @@ void print_vector(const vector<T>& v) {
  * @throws const char* If an invalid SORT_TYPE is provided or if the output
  * vector is not sorted.
  */
-long double run_test(SORT_TYPE type, vector<int> v) {
+long double run_test(SORT_TYPE type, vector<int> v, bool print = false) {
   using namespace std::chrono;
   vector<int> out;
 
   time_point<high_resolution_clock> start;
+  std::string tag;
 
   switch (type) {
     case BUBBLE:
+      tag = "bubble";
       start = high_resolution_clock::now();
       out = bubble_sort(v);
       break;
     case INSERTION:
+      tag = "insertion";
       start = high_resolution_clock::now();
       out = insertion_sort(v);
       break;
     case SELECTION:
+      tag = "selection";
       start = high_resolution_clock::now();
       out = selection_sort(v);
       break;
     case QUICK_FIRST:
+      tag = "quick";
       start = high_resolution_clock::now();
       out = quick_sort_first(v);
       break;
     case QUICK_MIDDLE:
+      tag = "quick";
       start = high_resolution_clock::now();
       out = quick_sort_middle(v);
       break;
@@ -199,6 +205,10 @@ long double run_test(SORT_TYPE type, vector<int> v) {
   }
   auto end = high_resolution_clock::now();
   duration<long double, std::micro> duration = end - start;
+
+  if (print) {
+    std::cout << tag << "," << v.size() << "," << duration.count() << std::endl;
+  }
 
   if (!is_sorted(out)) {
     throw "Received unsorted array out.";
@@ -211,7 +221,6 @@ enum SORT_CASE {
   SORTED,
   REV_SORTED,
   RANDOM,
-  SORTED_QUICK_MIDDLE,
 };
 
 /**
@@ -225,7 +234,7 @@ enum SORT_CASE {
  *
  * @throws const char* If an invalid SORT_CASE is provided.
  */
-vector<long double> run_battery(SORT_TYPE type, SORT_CASE sort_case, int num_runs, int run_size) {
+vector<long double> run_battery(SORT_TYPE type, SORT_CASE sort_case, int num_runs, int run_size, bool print = false) {
   vector<long double> timings;
 
   for (int i = 0; i < num_runs; i++) {
@@ -233,7 +242,6 @@ vector<long double> run_battery(SORT_TYPE type, SORT_CASE sort_case, int num_run
 
     switch (sort_case) {
       case SORTED:
-      case SORTED_QUICK_MIDDLE:
         v = sorted_vector(run_size);
         break;
       case REV_SORTED:
@@ -247,64 +255,18 @@ vector<long double> run_battery(SORT_TYPE type, SORT_CASE sort_case, int num_run
         throw "Invalid SORT_CASE provided";
     }
 
-    timings.push_back(run_test(type, v));
+    timings.push_back(run_test(type, v, print));
   }
 
   return timings;
 }
-
-class Args {
- public:
-  SORT_CASE sort_case;
-  SORT_TYPE sort_type;
-
-  void parse_args(int argc, char* argv[]) {
-    if (argc < 3) {
-      std::cerr << "Usage: " << argv[0] << " <algorithm> <case>" << std::endl;
-      exit(1);
-    }
-
-    // Parse sorting algorithm
-    std::string alg_arg = argv[1];
-    std::transform(alg_arg.begin(), alg_arg.end(), alg_arg.begin(), ::tolower);
-    if (alg_arg == "insertion") {
-      this->sort_type = INSERTION;
-    } else if (alg_arg == "selection") {
-      this->sort_type = SELECTION;
-    } else if (alg_arg == "quick_first") {
-      this->sort_type = QUICK_FIRST;
-    } else if (alg_arg == "quick_middle") {
-      this->sort_type = QUICK_MIDDLE;
-    } else if (alg_arg == "bubble") {
-      this->sort_type = BUBBLE;
-    } else {
-      std::cerr << "Invalid sorting algorithm: " << alg_arg
-                << ". Expected one of: bubble, insertion, selection, quick_first, quick_middle." << std::endl;
-      exit(1);
-    }
-
-    // Parse sorting case
-    std::string case_arg = argv[2];
-    std::transform(case_arg.begin(), case_arg.end(), case_arg.begin(), ::tolower);
-    if (case_arg == "sorted") {
-      this->sort_case = SORTED;
-    } else if (case_arg == "rev_sorted") {
-      this->sort_case = REV_SORTED;
-    } else if (case_arg == "random") {
-      this->sort_case = RANDOM;
-    } else {
-      std::cerr << "Invalid sorting case: " << case_arg << ". Expected one of: sorted, rev_sorted, random."
-                << std::endl;
-      exit(1);
-    }
-  }
-};
 
 class TimingSummary {
  public:
   long double min;
   long double max;
   long double average;
+  long double stddev;
 
   TimingSummary(vector<long double> timings) {
     if (timings.empty()) {
@@ -314,19 +276,90 @@ class TimingSummary {
     min = *std::min_element(timings.begin(), timings.end());
     max = *std::max_element(timings.begin(), timings.end());
     average = std::accumulate(timings.begin(), timings.end(), 0.0L) / timings.size();
+    stddev = 0.0L;
+    for (unsigned long i = 0; i < timings.size(); i++) {
+      stddev += std::pow(timings[i] - average, 2);
+    }
+    stddev = std::sqrt(stddev / (timings.size() - 1));
+  }
+  friend std::ostream& operator<<(std::ostream& os, const TimingSummary& ts) {
+    os << "Min/Avg/Max/Stddev: " << ts.min << " / " << ts.average << " / " << ts.max << " / " << ts.stddev;
+    return os;
   }
 };
 
-int main(int argc, char* argv[]) {
-  Args args;
-  args.parse_args(argc, argv);
+void run_default() {
+  auto separator = "***************************************";
 
-  srand(time(NULL));
-  auto timings = run_battery(args.sort_type, args.sort_case, 100, 1000);
-  print_vector(timings);
-
+  std::cout << separator << std::endl;
+  std::cout << "Bubble Sort on 10 vectors of length 100" << std::endl;
+  auto timings = run_battery(BUBBLE, RANDOM, 10, 100);
   TimingSummary summary(timings);
-  std::cout << "Min: " << summary.min << std::endl;
-  std::cout << "Max: " << summary.max << std::endl;
-  std::cout << "Average: " << summary.average << std::endl;
+  std::cout << summary << " microseconds" << std::endl;
+  std::cout << separator << std::endl;
+
+  std::cout << separator << std::endl;
+  std::cout << "Insertion Sort on 10 vectors of length 100" << std::endl;
+  timings = run_battery(INSERTION, RANDOM, 10, 100);
+  summary = TimingSummary(timings);
+  std::cout << summary << " microseconds" << std::endl;
+  std::cout << separator << std::endl;
+
+  std::cout << separator << std::endl;
+  std::cout << "Selection Sort on 10 vectors of length 100" << std::endl;
+  timings = run_battery(SELECTION, RANDOM, 10, 100);
+  summary = TimingSummary(timings);
+  std::cout << summary << " microseconds" << std::endl;
+  std::cout << separator << std::endl;
+
+  std::cout << separator << std::endl;
+  std::cout << "Quick Sort on 10 vectors of length 100" << std::endl;
+  timings = run_battery(QUICK_FIRST, RANDOM, 10, 100);
+  summary = TimingSummary(timings);
+  std::cout << summary << " microseconds" << std::endl;
+  std::cout << separator << std::endl;
+}
+
+int main(int argc, char* argv[]) {
+  srand(time(NULL));
+  if (argc == 1) {
+    run_default();
+    return 0;
+  }
+
+  if (argc > 2) {
+    std::cerr << "Usage: " << argv[0] << " [SORT_CASE]" << std::endl;
+    return -1;
+  }
+
+  int run_sizes[] = {10, 100, 1000, 5000, 10000};
+
+  std::string sort_case = argv[1];
+  std::transform(sort_case.begin(), sort_case.end(), sort_case.begin(), ::tolower);
+
+  if (sort_case == "best") {
+    for (int i = 0; i < 5; i++) {
+      run_battery(BUBBLE, SORTED, 50, run_sizes[i], true);
+      run_battery(INSERTION, SORTED, 50, run_sizes[i], true);
+      run_battery(SELECTION, SORTED, 50, run_sizes[i], true);
+      run_battery(QUICK_MIDDLE, SORTED, 50, run_sizes[i], true);
+    }
+  } else if (sort_case == "worst") {
+    for (int i = 0; i < 5; i++) {
+      run_battery(BUBBLE, REV_SORTED, 50, run_sizes[i], true);
+      run_battery(INSERTION, REV_SORTED, 50, run_sizes[i], true);
+      run_battery(SELECTION, REV_SORTED, 50, run_sizes[i], true);
+      run_battery(QUICK_FIRST, SORTED, 50, run_sizes[i], true);
+    }
+  } else if (sort_case == "average") {
+    for (int i = 0; i < 5; i++) {
+      run_battery(BUBBLE, RANDOM, 50, run_sizes[i], true);
+      run_battery(INSERTION, RANDOM, 50, run_sizes[i], true);
+      run_battery(SELECTION, RANDOM, 50, run_sizes[i], true);
+      run_battery(QUICK_FIRST, RANDOM, 50, run_sizes[i], true);
+    }
+  } else {
+    std::cerr << "Invalid SORT_CASE provided." << std::endl;
+    return -1;
+  }
 }

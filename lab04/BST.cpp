@@ -1,10 +1,12 @@
 // Lab 3 - BST_skeleton.cpp - rename it to BST.cpp
 // Author: Colin Jamison
 
+#include "BST.h"
+
 #include <limits.h>
+
 #include <iostream>
 #include <vector>
-#include "BST.h"
 
 // ***do not change the headers***
 
@@ -42,13 +44,37 @@ std::shared_ptr<Node> BST::search(std::shared_ptr<Node> n, int target) {
     }
 }
 
-std::shared_ptr<Node> BST::minimum() { return nullptr; }
+std::shared_ptr<Node> BST::minimum() {
+    if (!this->root) {
+        return nullptr;
+    }
 
-std::shared_ptr<Node> BST::minimum(std::shared_ptr<Node> n) { return nullptr; }
+    return minimum(this->root);
+}
 
-std::shared_ptr<Node> BST::maximum() { return nullptr; }
+std::shared_ptr<Node> BST::minimum(std::shared_ptr<Node> n) {
+    if (!n->left) {
+        return n;
+    } else {
+        return minimum(n->left);
+    }
+}
 
-std::shared_ptr<Node> BST::maximum(std::shared_ptr<Node> n) { return nullptr; }
+std::shared_ptr<Node> BST::maximum() {
+    if (!this->root) {
+        return nullptr;
+    }
+
+    return maximum(this->root);
+}
+
+std::shared_ptr<Node> BST::maximum(std::shared_ptr<Node> n) {
+    if (!n->right) {
+        return n;
+    } else {
+        return maximum(n->right);
+    }
+}
 
 void BST::insertValue(int val) {
     if (this->root == nullptr) {
@@ -76,9 +102,53 @@ std::shared_ptr<Node> BST::insertValue(std::shared_ptr<Node> n, int val) {
     return n;
 }
 
-void BST::deleteValue(int val) {}
+void BST::deleteValue(int val) {
+    if (this->root == nullptr) {
+        return;
+    }
 
-std::shared_ptr<Node> BST::deleteValue(std::shared_ptr<Node> n, int val) { return nullptr; }
+    this->root = deleteValue(this->root, val);
+}
+
+std::shared_ptr<Node> BST::deleteValue(std::shared_ptr<Node> n, int val) {
+    // If the current node is null, return null.
+    if (n == nullptr) {
+        return nullptr;
+    }
+
+    // Traverse the tree to find the node to delete.
+    if (val < n->value) {
+        n->left = deleteValue(n->left, val);
+    } else if (val > n->value) {
+        n->right = deleteValue(n->right, val);
+    } else {
+        // Node to be deleted found.
+
+        // If the current node has no children, return null.
+        if (n->left == nullptr && n->right == nullptr) {
+            return nullptr;
+        }
+
+        // If the current node has one child, return the child.
+        if (n->left == nullptr) {
+            return n->right;
+        }
+        if (n->right == nullptr) {
+            return n->left;
+        }
+
+        // If the current node has two children, find the minimum value in the right subtree.
+        int min = minimum(n->right)->value;
+
+        // Replace the current node's value with the minimum value in the right subtree.
+        n->value = min;
+
+        // Delete the minimum value in the right subtree.
+        n->right = deleteValue(n->right, min);
+    }
+
+    return n;
+}
 
 bool BST::isBST(std::shared_ptr<Node> n) {
     if (n == nullptr) {

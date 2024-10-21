@@ -124,25 +124,26 @@ std::shared_ptr<AVLNode> AVLTree::deleteValue(std::shared_ptr<AVLNode> n, int va
         n->left = deleteValue(n->left, val);
     } else if (val > n->value) {
         n->right = deleteValue(n->right, val);
+    } else if (n->left == nullptr && n->right == nullptr) {
+        n = nullptr;
+    } else if (n->left == nullptr) {
+        n = n->right;
+    } else if (n->right == nullptr) {
+        n = n->left;
     } else {
-        if (n->left == nullptr && n->right == nullptr) {
-            return nullptr;
-        }
-
-        if (n->left == nullptr) {
-            return n->right;
-        }
-        if (n->right == nullptr) {
-            return n->left;
-        }
-
-        int min = minimum(n->right)->value;
-        n->value = min;
-        n->right = deleteValue(n->right, min);
+        auto min = minimum(n->right);
+        n->value = min->value;
+        n->right = deleteValue(n->right, min->value);
     }
 
-    // Ensure the tree is balanced after deletion
-    return rebalance(n);
+    if (n == nullptr) {
+        return nullptr;
+    }
+
+    n->height = max(getHeight(n->left), getHeight(n->right)) + 1;
+    n->balanceFactor = getBalanceFactor(n);
+    n = rebalance(n);
+    return n;
 }
 
 std::shared_ptr<AVLNode> AVLTree::rebalance(std::shared_ptr<AVLNode> n) {

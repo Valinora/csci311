@@ -83,11 +83,7 @@ std::shared_ptr<AVLNode> AVLTree::maximum(std::shared_ptr<AVLNode> n) {
 int getHeight(std::shared_ptr<AVLNode> n) { return n == nullptr ? -1 : n->height; }
 
 int getBalanceFactor(std::shared_ptr<AVLNode> n) {
-    if (n == nullptr) {
-        return 0;
-    } else {
-        return n->balanceFactor;
-    }
+    return getHeight(n->right) - getHeight(n->left);
 }
 
 void AVLTree::insertValue(int val) {
@@ -108,7 +104,7 @@ std::shared_ptr<AVLNode> AVLTree::insertValue(std::shared_ptr<AVLNode> n, int va
     }
 
     n->height = max(getHeight(n->left), getHeight(n->right)) + 1;
-    n->balanceFactor = getHeight(n->right) - getHeight(n->left);
+    n->balanceFactor = getBalanceFactor(n);
     n = rebalance(n);
     return n;
 }
@@ -177,11 +173,11 @@ std::shared_ptr<AVLNode> AVLTree::rotateLeft(std::shared_ptr<AVLNode> n) {
     if (!newRoot) return nullptr;
     n->right = newRoot->left;
     n->height = max(getHeight(n->left), getHeight(n->right)) + 1;
-    n->balanceFactor = getHeight(n->left) - getHeight(n->right);
+    n->balanceFactor = getBalanceFactor(n);
 
     newRoot->left = n;
     newRoot->height = max(getHeight(newRoot->left), getHeight(newRoot->right)) + 1;
-    newRoot->balanceFactor = getHeight(newRoot->right) - getHeight(newRoot->left);
+    newRoot->balanceFactor = getBalanceFactor(newRoot);
 
     return newRoot;
 }
@@ -192,11 +188,11 @@ std::shared_ptr<AVLNode> AVLTree::rotateRight(std::shared_ptr<AVLNode> n) {
     if (!newRoot) return nullptr;
     n->left = newRoot->right;
     n->height = max(getHeight(n->left), getHeight(n->right)) + 1;
-    n->balanceFactor = getHeight(n->left) - getHeight(n->right);
+    n->balanceFactor = getBalanceFactor(n);
 
     newRoot->right = n;
     newRoot->height = max(getHeight(newRoot->left), getHeight(newRoot->right)) + 1;
-    newRoot->balanceFactor = getHeight(newRoot->right) - getHeight(newRoot->left);
+    newRoot->balanceFactor = getBalanceFactor(newRoot);
 
     return newRoot;
 }

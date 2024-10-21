@@ -1,9 +1,7 @@
 // Lab 5 Skeleton - rename it to "AVLTree.cpp"
 
 #include "AVLTree.h"
-
 #include <limits.h>
-
 #include <iostream>
 
 
@@ -201,20 +199,20 @@ std::shared_ptr<AVLNode> AVLTree::rotateLeftRight(std::shared_ptr<AVLNode> n) {
     if (!n) return nullptr;
 
     // Perform right rotation on the left child
-    n->left = rotateRight(n->left);
+    n->left = rotateLeft(n->left);
 
     // Perform left rotation on the node
-    return rotateLeft(n);
+    return rotateRight(n);
 }
 
 std::shared_ptr<AVLNode> AVLTree::rotateRightLeft(std::shared_ptr<AVLNode> n) {
     if (!n) return nullptr;
 
     // Perform left rotation on the right child
-    n->right = rotateLeft(n->right);
+    n->right = rotateRight(n->right);
 
     // Perform right rotation on the node
-    return rotateRight(n);
+    return rotateLeft(n);
 }
 
 void AVLTree::preOrder(std::shared_ptr<AVLNode> n, vector<std::shared_ptr<AVLNode>>& order) {

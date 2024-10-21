@@ -152,14 +152,16 @@ std::shared_ptr<AVLNode> AVLTree::deleteValue(std::shared_ptr<AVLNode> n, int va
 }
 
 std::shared_ptr<AVLNode> AVLTree::rebalance(std::shared_ptr<AVLNode> n) {
-  if (n->balanceFactor == 2) {
-    if (n->right->balanceFactor >= 0) {
+  if (!n) return nullptr;
+  int bf = getBalanceFactor(n);
+  if (bf == 2) {
+    if (n->right && getBalanceFactor(n->right) >= 0) {
       return rotateLeft(n);
     } else {
       return rotateRightLeft(n);
     }
-  } else if (n->balanceFactor == -2) {
-    if (n->left->balanceFactor <= 0) {
+  } else if (bf == -2) {
+    if (n->left && getBalanceFactor(n->left) <= 0) {
       return rotateRight(n);
     } else {
       return rotateLeftRight(n);
@@ -170,7 +172,9 @@ std::shared_ptr<AVLNode> AVLTree::rebalance(std::shared_ptr<AVLNode> n) {
 }
 
 std::shared_ptr<AVLNode> AVLTree::rotateLeft(std::shared_ptr<AVLNode> n) {
+    if (!n) return nullptr;
     auto newRoot = n->right;
+    if (!newRoot) return nullptr;
     n->right = newRoot->left;
     n->height = max(getHeight(n->left), getHeight(n->right)) + 1;
     n->balanceFactor = getHeight(n->left) - getHeight(n->right);
@@ -183,6 +187,7 @@ std::shared_ptr<AVLNode> AVLTree::rotateLeft(std::shared_ptr<AVLNode> n) {
 }
 
 std::shared_ptr<AVLNode> AVLTree::rotateRight(std::shared_ptr<AVLNode> n) {
+    if (!n) return nullptr;
     auto newRoot = n->left;
     if (!newRoot) return nullptr;
     n->left = newRoot->right;

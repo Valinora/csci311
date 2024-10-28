@@ -4,7 +4,6 @@
 #include <limits.h>
 #include <iostream>
 
-
 using namespace std;
 
 // do not change anything in the above
@@ -80,9 +79,7 @@ std::shared_ptr<AVLNode> AVLTree::maximum(std::shared_ptr<AVLNode> n) {
 
 int getHeight(std::shared_ptr<AVLNode> n) { return n == nullptr ? -1 : n->height; }
 
-int getBalanceFactor(std::shared_ptr<AVLNode> n) {
-    return getHeight(n->right) - getHeight(n->left);
-}
+int getBalanceFactor(std::shared_ptr<AVLNode> n) { return getHeight(n->right) - getHeight(n->left); }
 
 void AVLTree::insertValue(int val) {
     if (this->root == nullptr) {
@@ -147,23 +144,23 @@ std::shared_ptr<AVLNode> AVLTree::deleteValue(std::shared_ptr<AVLNode> n, int va
 }
 
 std::shared_ptr<AVLNode> AVLTree::rebalance(std::shared_ptr<AVLNode> n) {
-  if (!n) return nullptr;
-  int bf = getBalanceFactor(n);
-  if (bf == 2) {
-    if (n->right && getBalanceFactor(n->right) >= 0) {
-      return rotateLeft(n);
-    } else {
-      return rotateRightLeft(n);
+    if (!n) return nullptr;
+    int bf = getBalanceFactor(n);
+    if (bf == 2) {
+        if (n->right && getBalanceFactor(n->right) >= 0) {
+            return rotateLeft(n);
+        } else {
+            return rotateRightLeft(n);
+        }
+    } else if (bf == -2) {
+        if (n->left && getBalanceFactor(n->left) <= 0) {
+            return rotateRight(n);
+        } else {
+            return rotateLeftRight(n);
+        }
     }
-  } else if (bf == -2) {
-    if (n->left && getBalanceFactor(n->left) <= 0) {
-      return rotateRight(n);
-    } else {
-      return rotateLeftRight(n);
-    }
-  }
 
-  return n;
+    return n;
 }
 
 std::shared_ptr<AVLNode> AVLTree::rotateLeft(std::shared_ptr<AVLNode> n) {

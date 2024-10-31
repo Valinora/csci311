@@ -10,20 +10,23 @@
 *****************DATETIME-SYS*******************
 ************************************************/
 
-//G1_EXCEPTION: Only produce your code as directed in Section A, B, C, and D1_EXCEPTION.
-//G2_EXCEPTION: Do not write anything at the other places in this file.
-//D1_EXCEPTION: Put you names here (on this line):______________________________________
+// G1_EXCEPTION: Only produce your code as directed in Section A, B, C, and
+// D1_EXCEPTION. G2_EXCEPTION: Do not write anything at the other places in this
+// file. D1_EXCEPTION: Put you names here (on this line): Colin Jamison
 
 /***********************************************
 *************SECTION-A-HEADERS******************
 ************************************************/
-//SECTION_A_START: put your header files here using the include directive.
-//G3_EXCEPTION: You can also declare using standard namespace if you like, but do not use any global variable or method.
+// SECTION_A_START: put your header files here using the include directive.
+// G3_EXCEPTION: You can also declare using standard namespace if you like, but
+// do not use any global variable or method.
 
+#include <iostream>
+#include <vector>
 
+using namespace std;
 
-
-//SECTION_A_END: Section A ends here. 
+// SECTION_A_END: Section A ends here.
 /***********************************************
 *************SECTION-A-HEADERS-END**************
 ************************************************/
@@ -31,31 +34,122 @@
 /***********************************************
 *************SECTION-B-CLASSES******************
 ************************************************/
-//SECTION_B_START: put all your classes definitions here.
+// SECTION_B_START: put all your classes definitions here.
 
+class Plane {
+   public:
+    enum DIRECTION {
+        ARRIVING,
+        DEPARTING,
+    };
 
+    Plane(int entrace_time, DIRECTION dir, int id, int priority) {
+        this->entrance_time = entrace_time;
+        this->dir = dir;
+        this->id = id;
+        this->priority = priority;
+    }
 
+   private:
+    unsigned int entrance_time;
+    DIRECTION dir;
+    int id;
+    int priority;
 
+    int true_priority() {
+        // Something that combines priority, direction, and entrance_time, somehow.
+        return 0;
+    }
+};
 
-//SECTION_B_END: Section B ends here. 
+class MaxHeap {
+    int size() { return this->array.size(); }
+    bool empty() { return this->size() == 0; }
+    void push(Plane plane) {
+        this->array.push_back(plane);
+        upward_heapify(array.size() - 1);
+    }
+    Plane pop() {
+        swap(this->array[0], this->array[this->array.size() - 1]);
+        Plane temp = this->array.back();
+        this->array.pop_back();
+        downward_heapify(0);
+        return temp;
+    }
+    const Plane& peek() { return this->array[0]; }
+
+   private:
+    vector<Plane> array;
+    void upward_heapify(int idx);
+    void downward_heapify(int idx);
+};
+
+class InputHandler {
+   public:
+    InputHandler();
+    Plane read_line();
+};
+
+class Simulation {
+   private:
+    InputHandler input_hndl;
+    MaxHeap planes;
+    int time_step;
+
+   public:
+    // Dependency Injection Lite
+    Simulation(InputHandler input_hndl) {
+        this->input_hndl = input_hndl;
+        this->time_step = 0;
+    }
+    void step() {
+        // Get all aircraft entering simulation
+        // TODO: Find best way of getting all lines that match our current timestep
+        // Buffered Readers?
+
+        // if num_entering == 0 && size(planes) == 0
+        //     this->timestep++;
+        //     return;
+
+        // insert entering planes into heap
+        cout << "Time step " << this->time_step << endl;
+        cout << "\tEntering simulation" << endl;
+        // for plane : entering:
+        //   cout << "\t\t" << plane << endl;
+        //  this->planes.insert(plane);
+
+        // pop two planes from the heap
+        cout << "\tRunway A" << endl;
+        // if (plane_a)
+        // cout << "\t\t" << plane_a << endl;
+        cout << "\tRunway B" << endl;
+        // if (plane_b)
+        // cout << "\t\t" << plane_b << endl;
+
+        this->time_step++;
+    }
+};
+
+// SECTION_B_END: Section B ends here.
 /***********************************************
 *************SECTION-B-CLASSES-END**************
 ************************************************/
 
-
 /***********************************************
 *************SECTION-C-MAIN-FUNCTION************
 ************************************************/
-//SECTION_C_START: write your main function here.
+// SECTION_C_START: write your main function here.
 
-
-int main(int argc, char* argv[]) {
-    return 0;
+int main() {
+    // High Level Overview:
+    // .. initialization ..
+    // while should_continue:
+    //   receive_input()
+    //   step()
+    //   print_state()
 }
 
-
-
-//SECTION_C_END: Section C ends here. 
+// SECTION_C_END: Section C ends here.
 /***********************************************
 ************SECTION-C-MAIN-FUNCTION-END*********
 ************************************************/

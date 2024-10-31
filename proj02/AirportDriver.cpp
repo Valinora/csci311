@@ -21,7 +21,10 @@
 // G3_EXCEPTION: You can also declare using standard namespace if you like, but
 // do not use any global variable or method.
 
+#include <cctype>
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -64,16 +67,16 @@ class Plane {
 
     friend istream& operator>>(istream& iss, Plane& plane) {
         // Parse string and return a Plane object
-        // Format: "entrance_time dir id priority"
-        // Example: "0 ARRIVING 0 0"
+        // Format: "entrance_time id dir priority"
+        // Example: "0 0 arriving  0"
         unsigned int entrance_time;
         int id, priority;
         string dir_str;
         DIRECTION dir;
 
-        if (!(iss >> entrance_time >> dir_str >> id >> priority)) {
+        if (!(iss >> entrance_time >> id >> dir_str >> priority)) {
             throw "Invalid input string";
-    }
+        }
 
         if (dir_str == "arriving") {
             dir = ARRIVING;
@@ -89,7 +92,7 @@ class Plane {
 
     friend ostream& operator<<(ostream& os, const Plane& plane) {
         string dir = plane.dir == ARRIVING ? "arriving" : "departing";
-        os << plane.entrance_time << " " << dir << " " << plane.id << " " << plane.priority;
+        os << plane.entrance_time << " " << plane.id << " " << dir << " " << plane.priority;
         return os;
     }
 
@@ -158,28 +161,44 @@ class Simulation {
    private:
     MinHeap planes;
     int time_step;
+    int expected;
 
    public:
-    Simulation() {
+    Simulation(int expected) {
         this->time_step = 0;
+        this->expected = expected;
     }
     void step() {
-        // Get all aircraft entering simulation
-        // TODO: Find best way of getting all lines that match our current timestep
-        // Buffered Readers?
+        // Get all aircraft entering simulation at current timestep
+        vector<Plane> entering;
+        char next = cin.peek();
+        if (next == '\n') {
+            cin.ignore();
+        }
+        next = cin.peek();
+        while (isdigit(next) && next - '0' == this->time_step) {
+            Plane plane;
+            cin >> plane;
+            entering.push_back(plane);
+        }
 
-        // if num_entering == 0 && size(planes) == 0
-        //     this->timestep++;
-        //     return;
+        if (entering.size() == 0 && this->planes.empty()) {
+            this->time_step++;
+            return;
+        }
 
-        // insert entering planes into heap
         cout << "Time step " << this->time_step << endl;
         cout << "\tEntering simulation" << endl;
-        // for plane : entering:
-        //   cout << "\t\t" << plane << endl;
-        //  this->planes.insert(plane);
+
+        // insert entering planes into heap, maintaining input order.
+        for (auto plane : entering) {
+            cout << "\t\t" << plane << endl;
+            this->planes.push(plane);
+        }
 
         // pop two planes from the heap
+        Plane plane_a = this->planes.pop();
+        Plane plane_b = this->planes.pop();
         cout << "\tRunway A" << endl;
         // if (plane_a)
         // cout << "\t\t" << plane_a << endl;
@@ -208,6 +227,29 @@ int main() {
     //   receive_input()
     //   step()
     //   print_state()
+
+    int planes_expected;
+    int entered = 0;
+    cin >> planes_expected;
+
+    cout << "Planes expected: " << planes_expected << endl;
+
+    while (entered < planes_expected) {
+        char next = cin.peek();
+        if (next == '\n') {
+            cin.ignore();
+            continue;
+        }
+
+        if (next != '0') {
+            break;
+        }
+
+        Plane plane;
+        cin >> plane;
+        cout << "Plane: " << plane << endl;
+        entered++;
+    }
 }
 
 // SECTION_C_END: Section C ends here.

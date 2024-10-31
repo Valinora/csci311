@@ -160,9 +160,7 @@ class Simulation {
     int time_step;
 
    public:
-    // Dependency Injection Lite
-    Simulation(InputHandler input_hndl) {
-        this->input_hndl = input_hndl;
+    Simulation() {
         this->time_step = 0;
     }
     void step() {

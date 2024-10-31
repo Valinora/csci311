@@ -106,6 +106,9 @@ class MinHeap {
         upward_heapify(array.size() - 1);
     }
     Plane pop() {
+        if (this->empty()) {
+            throw "Heap is empty";
+        }
         swap(this->array[0], this->array[this->array.size() - 1]);
         Plane temp = this->array.back();
         this->array.pop_back();
@@ -114,22 +117,46 @@ class MinHeap {
     }
     const Plane& peek() { return this->array[0]; }
 
+    string dump() {
+        stringstream str;
+        str << "Heap: { ";
+        for (auto plane : this->array) {
+            str << plane << ", ";
+        }
+        str << "}";
+        return str.str();
+    }
+
    private:
     vector<Plane> array;
-    void upward_heapify(int idx);
-    void downward_heapify(int idx);
-};
-
-class InputHandler {
-   public:
-    InputHandler();
-    Plane read_line();
+    void upward_heapify(int idx) {
+        if (idx == 0) return;
+        int parent = (idx - 1) / 2;
+        if (this->array[idx] < this->array[parent]) {
+            swap(this->array[idx], this->array[parent]);
+            upward_heapify(parent);
+        }
+    }
+    void downward_heapify(int idx) {
+        int left = 2 * idx + 1;
+        int right = 2 * idx + 2;
+        int smallest = idx;
+        if (left < this->size() && this->array[left] < this->array[smallest]) {
+            smallest = left;
+        }
+        if (right < this->size() && this->array[right] < this->array[smallest]) {
+            smallest = right;
+        }
+        if (smallest != idx) {
+            swap(this->array[idx], this->array[smallest]);
+            downward_heapify(smallest);
+        }
+    }
 };
 
 class Simulation {
    private:
-    InputHandler input_hndl;
-    MaxHeap planes;
+    MinHeap planes;
     int time_step;
 
    public:

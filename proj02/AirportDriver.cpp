@@ -43,26 +43,62 @@ class Plane {
         DEPARTING,
     };
 
-    Plane(int entrace_time, DIRECTION dir, int id, int priority) {
-        this->entrance_time = entrace_time;
-        this->dir = dir;
-        this->id = id;
-        this->priority = priority;
-    }
-
-   private:
     unsigned int entrance_time;
     DIRECTION dir;
     int id;
     int priority;
 
-    int true_priority() {
-        // Something that combines priority, direction, and entrance_time, somehow.
-        return 0;
+    Plane() : entrance_time(0), dir(ARRIVING), id(0), priority(0) {}
+
+    Plane(int entrance_time, DIRECTION dir, int id, int priority) {
+        this->entrance_time = entrance_time;
+        this->dir = dir;
+        this->id = id;
+        this->priority = priority;
     }
+
+    int true_priority() const {
+        // Something that combines priority, direction, and entrance_time, somehow.
+        return this->priority;
+    }
+
+    friend istream& operator>>(istream& iss, Plane& plane) {
+        // Parse string and return a Plane object
+        // Format: "entrance_time dir id priority"
+        // Example: "0 ARRIVING 0 0"
+        unsigned int entrance_time;
+        int id, priority;
+        string dir_str;
+        DIRECTION dir;
+
+        if (!(iss >> entrance_time >> dir_str >> id >> priority)) {
+            throw "Invalid input string";
+    }
+
+        if (dir_str == "arriving") {
+            dir = ARRIVING;
+        } else if (dir_str == "departing") {
+            dir = DEPARTING;
+        } else {
+            throw "Invalid direction";
+        }
+
+        plane = Plane(entrance_time, dir, id, priority);
+        return iss;
+    }
+
+    friend ostream& operator<<(ostream& os, const Plane& plane) {
+        string dir = plane.dir == ARRIVING ? "arriving" : "departing";
+        os << plane.entrance_time << " " << dir << " " << plane.id << " " << plane.priority;
+        return os;
+    }
+
+    bool operator>(const Plane& other) { return this->true_priority() > other.true_priority(); }
+    bool operator<(const Plane& other) { return this->true_priority() < other.true_priority(); }
 };
 
-class MaxHeap {
+class MinHeap {
+   public:
     int size() { return this->array.size(); }
     bool empty() { return this->size() == 0; }
     void push(Plane plane) {

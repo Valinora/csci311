@@ -50,14 +50,22 @@ class Plane {
     DIRECTION dir;
     int id;
     int priority;
+    bool valid;
 
-    Plane() : entrance_time(0), dir(ARRIVING), id(0), priority(0) {}
+    Plane() : entrance_time(0), dir(ARRIVING), id(0), priority(0), valid(true) {}
 
     Plane(int entrance_time, DIRECTION dir, int id, int priority) {
         this->entrance_time = entrance_time;
         this->dir = dir;
         this->id = id;
         this->priority = priority;
+        this->valid = true;
+    }
+
+    static Plane invalid() {
+        Plane plane;
+        plane.valid = false;
+        return plane;
     }
 
     int true_priority() const {
@@ -102,6 +110,7 @@ class Plane {
 
 class MinHeap {
    public:
+    MinHeap() { this->array = vector<Plane>(); }
     int size() { return this->array.size(); }
     bool empty() { return this->size() == 0; }
     void push(Plane plane) {
@@ -158,31 +167,41 @@ class MinHeap {
 };
 
 class Simulation {
-   private:
-    MinHeap planes;
+   public:
+    MinHeap departures;
+    MinHeap arrivals;
+    vector<Plane> input;
     int time_step;
     int expected;
+    int processed;
 
-   public:
     Simulation(int expected) {
         this->time_step = 0;
         this->expected = expected;
+        this->input = vector<Plane>();
+        this->input.reserve(expected);
+        this->departures = MinHeap();
+        this->arrivals = MinHeap();
+        this->processed = 0;
+
+        int entered = 0;
+        while (entered < expected) {
+            Plane plane;
+            cin >> plane;
+            this->input.push_back(plane);
+            entered++;
+        }
     }
     void step() {
         // Get all aircraft entering simulation at current timestep
         vector<Plane> entering;
-        char next = cin.peek();
-        if (next == '\n') {
-            cin.ignore();
-        }
-        next = cin.peek();
-        while (isdigit(next) && next - '0' == this->time_step) {
-            Plane plane;
-            cin >> plane;
-            entering.push_back(plane);
+        for (auto plane : this->input) {
+            if (plane.entrance_time == this->time_step) {
+                entering.push_back(plane);
+            }
         }
 
-        if (entering.size() == 0 && this->planes.empty()) {
+        if (entering.size() == 0 && this->departures.empty() && this->arrivals.empty()) {
             this->time_step++;
             return;
         }
@@ -193,20 +212,45 @@ class Simulation {
         // insert entering planes into heap, maintaining input order.
         for (auto plane : entering) {
             cout << "\t\t" << plane << endl;
-            this->planes.push(plane);
+            if (plane.dir == Plane::ARRIVING) {
+                this->arrivals.push(plane);
+            } else {
+                this->departures.push(plane);
+            }
         }
 
         // pop two planes from the heap
-        Plane plane_a = this->planes.pop();
-        Plane plane_b = this->planes.pop();
+        Plane plane_a = Plane::invalid();
+        Plane plane_b = Plane::invalid();
+
+        if (!this->departures.empty()) {
+            plane_a = this->departures.pop();
+        } else if (!this->arrivals.empty()) {
+            plane_a = this->arrivals.pop();
+        }
+
+        if (!this->arrivals.empty()) {
+            plane_b = this->arrivals.pop();
+        } else if (!this->departures.empty()) {
+            plane_b = this->departures.pop();
+        }
+
         cout << "\tRunway A" << endl;
-        // if (plane_a)
-        // cout << "\t\t" << plane_a << endl;
+        if (plane_a.valid) {
+            cout << "\t\t" << plane_a << endl;
+            this->processed++;
+        }
         cout << "\tRunway B" << endl;
-        // if (plane_b)
-        // cout << "\t\t" << plane_b << endl;
+        if (plane_b.valid) {
+            cout << "\t\t" << plane_b << endl;
+            this->processed++;
+        }
 
         this->time_step++;
+    }
+
+    bool should_step() {
+        return this->processed < this->expected;
     }
 };
 
@@ -234,21 +278,10 @@ int main() {
 
     cout << "Planes expected: " << planes_expected << endl;
 
-    while (entered < planes_expected) {
-        char next = cin.peek();
-        if (next == '\n') {
-            cin.ignore();
-            continue;
-        }
+    Simulation sim = Simulation(planes_expected);
 
-        if (next != '0') {
-            break;
-        }
-
-        Plane plane;
-        cin >> plane;
-        cout << "Plane: " << plane << endl;
-        entered++;
+    while (sim.should_step()) {
+        sim.step();
     }
 }
 

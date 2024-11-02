@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-HashTable::HashTable() : size(11), p(31), numElements(0) { this->table.reserve(11); }
+HashTable::HashTable() : size(11), p(31), numElements(0) { this->table.resize(11); }
 
 HashTable::HashTable(int s, int mult) {
     this->size = s;
@@ -36,16 +36,14 @@ void HashTable::printTable() {
 
 int HashTable::search(std::string s) {
     int hash = HashTable::hash(s);
-    int idx = -1;
 
     for (int i = 0; i < this->table[hash].size(); i++) {
         if (this->table[hash][i] == s) {
-            idx = hash;
-            break;
+            return hash;
         }
     }
 
-    return idx;
+    return -1;
 }
 
 void HashTable::insert(std::string s) {

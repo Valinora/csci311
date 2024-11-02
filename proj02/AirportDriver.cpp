@@ -70,7 +70,7 @@ class Plane {
 
     int true_priority() const {
         // Something that combines priority, direction, and entrance_time, somehow.
-        return (this->priority + this->id) * this->entrance_time;
+        return this->priority + (2 * this->id) + this->entrance_time;
     }
 
     friend istream& operator>>(istream& iss, Plane& plane) {
@@ -201,6 +201,8 @@ class Simulation {
             }
         }
 
+        // If no aircraft are entering this timestep, and both queues are empty, advance the timestep
+        // and print nothing.
         if (entering.size() == 0 && this->departures.empty() && this->arrivals.empty()) {
             this->time_step++;
             return;
@@ -219,19 +221,27 @@ class Simulation {
             }
         }
 
-        // pop two planes from the heap
         Plane plane_a = Plane::invalid();
         Plane plane_b = Plane::invalid();
 
+        /*
+          Tries to fill departures into a, and arrivals into b.
+          If that fails, then uses work stealing to make sure that
+          an aircraft is always being processed if needed.
+        */
         if (!this->departures.empty()) {
             plane_a = this->departures.pop();
-        } else if (!this->arrivals.empty()) {
-            plane_a = this->arrivals.pop();
         }
 
         if (!this->arrivals.empty()) {
             plane_b = this->arrivals.pop();
-        } else if (!this->departures.empty()) {
+        }
+
+        if (!plane_a.valid && !this->arrivals.empty()) {
+            plane_a = this->arrivals.pop();
+        }
+
+        if (!plane_b.valid && !this->departures.empty()) {
             plane_b = this->departures.pop();
         }
 
@@ -249,9 +259,7 @@ class Simulation {
         this->time_step++;
     }
 
-    bool should_step() {
-        return this->processed < this->expected;
-    }
+    bool should_step() { return this->processed < this->expected; }
 };
 
 // SECTION_B_END: Section B ends here.
@@ -266,9 +274,9 @@ class Simulation {
 
 int main() {
     // High Level Overview:
-    // .. initialization ..
+    // read all lines of input into buffer
     // while should_continue:
-    //   receive_input()
+    //   collect all aircraft entering current timestep from buffer
     //   step()
     //   print_state()
 

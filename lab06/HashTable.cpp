@@ -8,12 +8,12 @@
 
 #include <iostream>
 
-HashTable::HashTable() : size(11), p(31), numElements(0) { this->table.resize(11); }
+HashTable::HashTable() : size(11), numElements(0), p(31) { this->table.resize(11); }
 
 HashTable::HashTable(int s, int mult) {
     this->size = s;
-    this->p = mult;
     this->numElements = 0;
+    this->p = mult;
     this->table.resize(s);
 }
 
@@ -23,10 +23,10 @@ int HashTable::getP() { return this->p; }
 
 void HashTable::printTable() {
     std::cout << "HASH TABLE CONTENTS" << std::endl;
-    for (int i = 0; i < table.size(); i++) {
+    for (size_t i = 0; i < table.size(); i++) {
         if (table[i].size() > 0) {
             std::cout << i << ": ";
-            for (int j = 0; j < table[i].size() - 1; j++) {
+            for (size_t j = 0; j < table[i].size() - 1; j++) {
                 std::cout << table[i][j] << ", ";
             }
             std::cout << table[i][table[i].size() - 1] << std::endl;
@@ -37,7 +37,7 @@ void HashTable::printTable() {
 int HashTable::search(std::string s) {
     int hash = HashTable::hash(s);
 
-    for (int i = 0; i < this->table[hash].size(); i++) {
+    for (size_t i = 0; i < this->table[hash].size(); i++) {
         if (this->table[hash][i] == s) {
             return hash;
         }
@@ -62,7 +62,7 @@ void HashTable::remove(std::string s) {
     int idx = HashTable::search(s);
 
     if (idx != -1) {
-        for (int i = 0; i < this->table[hash].size(); i++) {
+        for (size_t i = 0; i < this->table[hash].size(); i++) {
             if (this->table[hash][i] == s) {
                 this->table[hash].erase(this->table[hash].begin() + i);
                 this->numElements--;
@@ -94,7 +94,7 @@ void HashTable::resize(int s) {
 
 int HashTable::hash(std::string s, int tableSize) {
     unsigned int hash = 0;
-    for (int i = 0; i < s.length(); i++) {
+    for (size_t i = 0; i < s.length(); i++) {
         hash += (int)s[i] * std::pow(this->p, i);
     }
 

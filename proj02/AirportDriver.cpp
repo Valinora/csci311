@@ -21,10 +21,8 @@
 // G3_EXCEPTION: You can also declare using standard namespace if you like, but
 // do not use any global variable or method.
 
-#include <cctype>
 #include <iostream>
 #include <sstream>
-#include <string>
 #include <vector>
 
 using namespace std;

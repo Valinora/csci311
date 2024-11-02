@@ -70,7 +70,7 @@ class Plane {
 
     int true_priority() const {
         // Something that combines priority, direction, and entrance_time, somehow.
-        return this->priority;
+        return (this->priority + this->id) * this->entrance_time;
     }
 
     friend istream& operator>>(istream& iss, Plane& plane) {
@@ -275,8 +275,6 @@ int main() {
     int planes_expected;
     int entered = 0;
     cin >> planes_expected;
-
-    cout << "Planes expected: " << planes_expected << endl;
 
     Simulation sim = Simulation(planes_expected);
 

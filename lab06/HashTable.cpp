@@ -8,12 +8,13 @@
 
 #include <iostream>
 
-HashTable::HashTable() : size(11), p(31) { this->table.reserve(11); }
+HashTable::HashTable() : size(11), p(31), numElements(0) { this->table.reserve(11); }
 
 HashTable::HashTable(int s, int mult) {
     this->size = s;
     this->p = mult;
-    this->table.reserve(s);
+    this->numElements = 0;
+    this->table.resize(s);
 }
 
 int HashTable::getSize() { return this->size; }
@@ -39,7 +40,8 @@ int HashTable::search(std::string s) {
 
     for (int i = 0; i < this->table[hash].size(); i++) {
         if (this->table[hash][i] == s) {
-            idx = i;
+            idx = hash;
+            break;
         }
     }
 
@@ -48,19 +50,55 @@ int HashTable::search(std::string s) {
 
 void HashTable::insert(std::string s) {
     int hash = HashTable::hash(s);
+
+    if (this->table[hash].size() == 0) {
+        this->table[hash] = std::vector<std::string>();
+    }
+
     this->table[hash].push_back(s);
     this->numElements++;
 }
 
-void HashTable::remove(std::string s) {}
+void HashTable::remove(std::string s) {
+    int hash = HashTable::hash(s);
+    int idx = HashTable::search(s);
 
-void HashTable::resize(int s) {}
+    if (idx != -1) {
+        for (int i = 0; i < this->table[hash].size(); i++) {
+            if (this->table[hash][i] == s) {
+                this->table[hash].erase(this->table[hash].begin() + i);
+                this->numElements--;
+                break;
+            }
+        }
+    }
+}
 
-int HashTable::hash(std::string s) {
+void HashTable::resize(int s) {
+    std::vector<std::vector<std::string>> newTable;
+    newTable.resize(s);
+
+    for (int i = 0; i < this->table.size(); i++) {
+        for (int j = 0; j < this->table[i].size(); j++) {
+            int hash = HashTable::hash(this->table[i][j], s);
+            if (newTable[hash].size() == 0) {
+                newTable[hash] = std::vector<std::string>();
+            }
+            newTable[hash].push_back(this->table[i][j]);
+        }
+    }
+
+    this->table = newTable;
+    this->size = s;
+}
+
+int HashTable::hash(std::string s, int tableSize) {
     unsigned int hash = 0;
     for (int i = 0; i < s.length(); i++) {
         hash += (int)s[i] * std::pow(this->p, i);
     }
 
-    return hash % this->size;
+    return hash % tableSize;
 }
+
+int HashTable::hash(std::string s) { return HashTable::hash(s, this->size); }

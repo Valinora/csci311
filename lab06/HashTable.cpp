@@ -75,10 +75,11 @@ void HashTable::remove(std::string s) {
 void HashTable::resize(int s) {
     std::vector<std::vector<std::string>> newTable;
     newTable.resize(s);
+    this->size = s;
 
     for (const auto& bucket : this->table) {
         for (const auto& item : bucket) {
-            int hash = HashTable::hash(item, s);
+            int hash = HashTable::hash(item);
 
             if (newTable[hash].size() == 0) {
                 newTable[hash] = std::vector<std::string>();
@@ -89,16 +90,13 @@ void HashTable::resize(int s) {
     }
 
     this->table = std::move(newTable);
-    this->size = s;
 }
 
-int HashTable::hash(std::string s, int tableSize) {
+int HashTable::hash(std::string s) {
     unsigned int hash = 0;
     for (size_t i = 0; i < s.length(); i++) {
         hash += (int)s[i] * std::pow(this->p, i);
     }
 
-    return hash % tableSize;
+    return hash % this->size;
 }
-
-int HashTable::hash(std::string s) { return HashTable::hash(s, this->size); }

@@ -31,7 +31,6 @@ class HashTable{
     int p;
     std::vector<std::vector<std::string>> table;
 
-    int hash(std::string, int);
     int hash(std::string);
 };
 

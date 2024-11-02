@@ -52,7 +52,7 @@ class Plane {
 
     Plane() : entrance_time(0), dir(ARRIVING), id(0), priority(0), valid(true) {}
 
-    Plane(int entrance_time, DIRECTION dir, int id, int priority) {
+    Plane(unsigned int entrance_time, DIRECTION dir, int id, int priority) {
         this->entrance_time = entrance_time;
         this->dir = dir;
         this->id = id;
@@ -68,7 +68,7 @@ class Plane {
 
     int true_priority() const {
         // Something that combines priority, direction, and entrance_time, somehow.
-        return this->priority + (2 * this->id) + this->entrance_time;
+        return 2 * this->priority + this->id + this->entrance_time;
     }
 
     friend istream& operator>>(istream& iss, Plane& plane) {
@@ -102,8 +102,16 @@ class Plane {
         return os;
     }
 
-    bool operator>(const Plane& other) { return this->true_priority() > other.true_priority(); }
-    bool operator<(const Plane& other) { return this->true_priority() < other.true_priority(); }
+    bool operator>(const Plane& other) {
+        if (this->priority != other.priority) {
+            return this->priority > other.priority;
+        } else if (this->entrance_time != other.entrance_time) {
+            return this->entrance_time > other.entrance_time;
+        } else {
+            return this->id > other.id;
+        }
+    }
+    bool operator<(const Plane& other) { return !(*this > other); };
 };
 
 class MinHeap {

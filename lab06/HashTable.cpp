@@ -78,17 +78,19 @@ void HashTable::resize(int s) {
     std::vector<std::vector<std::string>> newTable;
     newTable.resize(s);
 
-    for (int i = 0; i < this->table.size(); i++) {
-        for (int j = 0; j < this->table[i].size(); j++) {
-            int hash = HashTable::hash(this->table[i][j], s);
+    for (const auto& bucket : this->table) {
+        for (const auto& item : bucket) {
+            int hash = HashTable::hash(item, s);
+
             if (newTable[hash].size() == 0) {
                 newTable[hash] = std::vector<std::string>();
             }
-            newTable[hash].push_back(this->table[i][j]);
+
+            newTable[hash].emplace_back(item);
         }
     }
 
-    this->table = newTable;
+    this->table = std::move(newTable);
     this->size = s;
 }
 

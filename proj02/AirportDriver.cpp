@@ -279,14 +279,7 @@ class Simulation {
 // SECTION_C_START: write your main function here.
 
 int main() {
-    // High Level Overview:
-    // read all lines of input into buffer
-    // while should_continue:
-    //   collect all aircraft entering current timestep from buffer
-    //   step()
-    //   print_state()
-
-    int planes_expected;
+    int planes_expected = 0;
     int entered = 0;
     cin >> planes_expected;
 

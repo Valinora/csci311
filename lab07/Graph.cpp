@@ -17,9 +17,26 @@ Graph::Graph(){
 }
 
 void Graph::printAdjList(){
+  for (auto node : nodes) {
+    std::cout << node->id << ": ";
+    for (auto neighbor : node->neighbors) {
+      std::cout << neighbor->id << " ";
+    }
+    std::cout << std::endl;
+  }
 }
 
 bool Graph::isNeighbor(int u, int v){
+  for (auto node : nodes) {
+    if (node->id == u) {
+      for (auto neighbor : node->neighbors) {
+        if (neighbor->id == v) {
+          return true;
+        }
+      }
+    }
+  }
+
   return false;
 }
 

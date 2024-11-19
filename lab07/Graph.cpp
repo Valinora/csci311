@@ -101,7 +101,9 @@ std::vector<int> Graph::distancesFrom(int s) {
   auto distances = std::vector<int>();
   BFS(s);
 
-
+  for (auto& node : nodes) {
+    distances.push_back(node->dist);
+  }
 
   return distances;
 }

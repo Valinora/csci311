@@ -117,10 +117,34 @@ bool Graph::isConnected(){
 }
 
 bool Graph::hasCycle(){
+  for (auto& node : nodes) {
+    node->visited = false;
+    node->predecessor = nullptr;
+  }
+
+  for (auto& node : nodes) {
+    if (!node->visited && hasCycleRecur(node->id)) {
+      return true;
+    }
+  }
+
   return false;
 }
 
 bool Graph::hasCycleRecur(int s){
+  nodes[s]->visited = true;
+
+  for (auto& node : nodes[s]->neighbors) {
+    if (!node->visited) {
+      node->predecessor = nodes[s];
+      if (hasCycleRecur(node->id)) {
+        return true;
+      }
+    } else if (nodes[s]->predecessor->id != node->predecessor->id) {
+      return true;
+    }
+  }
+
   return false;
 }
 

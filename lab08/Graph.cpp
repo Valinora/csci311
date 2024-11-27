@@ -1,19 +1,21 @@
-// CSCI 311 
+// CSCI 311
 // Graph class cpp
 // Author: Colin Jamison
 
-#include <iostream>
 #include "Graph.h"
-#include <queue>
+
 #include <limits.h>
 
-//do not change the header files
-//implement the following functions and do not introduce new functions
+#include <iostream>
+#include <queue>
 
-Graph::Graph(){
-}
 
-void Graph::printAdjList(){
+// do not change the header files
+// implement the following functions and do not introduce new functions
+
+Graph::Graph() {}
+
+void Graph::printAdjList() {
   for (auto node : nodes) {
     std::cout << node->id << ": ";
     for (auto neighbor : node->neighbors) {
@@ -23,7 +25,7 @@ void Graph::printAdjList(){
   }
 }
 
-bool Graph::isNeighbor(int u, int v){
+bool Graph::isNeighbor(int u, int v) {
   for (auto neighbor : nodes[u]->neighbors) {
     if (neighbor->id == v) {
       return true;
@@ -33,7 +35,7 @@ bool Graph::isNeighbor(int u, int v){
   return false;
 }
 
-void Graph::DFS(){
+void Graph::DFS() {
   for (auto& node : nodes) {
     node->visited = false;
     node->predecessor = nullptr;
@@ -50,7 +52,7 @@ void Graph::DFS(){
   }
 }
 
-int Graph::DFSVisit(int s, int time){
+int Graph::DFSVisit(int s, int time) {
   time++;
   nodes[s]->discovered = time;
   nodes[s]->visited = true;
@@ -69,7 +71,7 @@ int Graph::DFSVisit(int s, int time){
   return time;
 }
 
-void Graph::BFS(int s){
+void Graph::BFS(int s) {
   for (auto& node : nodes) {
     node->dist = INT_MAX;
     node->visited = false;
@@ -97,7 +99,7 @@ void Graph::BFS(int s){
   }
 }
 
-std::vector<int> Graph::distancesFrom(int s){
+std::vector<int> Graph::distancesFrom(int s) {
   auto distances = std::vector<int>();
   BFS(s);
 
@@ -108,15 +110,52 @@ std::vector<int> Graph::distancesFrom(int s){
   return distances;
 }
 
-bool Graph::isTwoColorable(){
-  return false;
+bool Graph::isTwoColorable() {
+  for (auto& node : nodes) {
+    node->visited = false;
+    node->color = "";
+  }
+
+  for (auto& node : nodes) {
+    if (!node->visited) {
+      node->color = "red";
+      node->visited = true;
+      auto queue = std::queue<int>();
+      queue.push(node->id);
+
+      while (!queue.empty()) {
+        int idx = queue.front();
+        queue.pop();
+
+        for (auto& neighbor : nodes[idx]->neighbors) {
+          if (!neighbor->visited) {
+            neighbor->visited = true;
+            neighbor->predecessor = nodes[idx];
+            neighbor->color = (nodes[idx]->color == "red") ? "blue" : "red";
+            queue.push(neighbor->id);
+          } else if (neighbor->color == nodes[idx]->color) {
+            return false;
+          }
+        }
+      }
+    }
+  }
+  return true;
 }
 
-bool Graph::isConnected(){
-  return false;
+bool Graph::isConnected() {
+  BFS(0);
+
+  for (auto& node : nodes) {
+    if (!node->visited) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
-bool Graph::hasCycle(){
+bool Graph::hasCycle() {
   for (auto& node : nodes) {
     node->visited = false;
     node->predecessor = nullptr;
@@ -131,16 +170,16 @@ bool Graph::hasCycle(){
   return false;
 }
 
-bool Graph::hasCycleRecur(int s){
+bool Graph::hasCycleRecur(int s) {
   nodes[s]->visited = true;
 
-  for (auto& node : nodes[s]->neighbors) {
-    if (!node->visited) {
-      node->predecessor = nodes[s];
-      if (hasCycleRecur(node->id)) {
+  for (auto& neighbor : nodes[s]->neighbors) {
+    if (!neighbor->visited) {
+      neighbor->predecessor = nodes[s];
+      if (hasCycleRecur(neighbor->id)) {
         return true;
       }
-    } else if (nodes[s]->predecessor->id != node->predecessor->id) {
+    } else if (neighbor != nodes[s]->predecessor) {
       return true;
     }
   }
@@ -148,6 +187,16 @@ bool Graph::hasCycleRecur(int s){
   return false;
 }
 
-bool Graph::isReachable(int u, int v){
-  return false;
+bool Graph::isReachable(int u, int v) {
+  if (u == v) {
+    return true;
+  }
+
+  BFS(u);
+
+  if (nodes[v]->visited) {
+    return true;
+  } else {
+    return false;
+  }
 }

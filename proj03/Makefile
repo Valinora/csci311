@@ -1,5 +1,5 @@
-main: AirportDriver.cpp
-	g++ -std=c++11 AirportDriver.cpp -o main
+main: main.cpp
+	g++ -std=c++11 main.cpp -o main
 
 test: main
 	./runTests main tests/

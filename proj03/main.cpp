@@ -12,7 +12,7 @@
 
 // G1_EXCEPTION: Only produce your code as directed in Section A, B, C, and D1_EXCEPTION.
 // G2_EXCEPTION: Do not write anything at the other places in this file.
-// D1_EXCEPTION: Put you names here (on this line):______________________________________
+// D1_EXCEPTION: Put you names here (on this line): Colin Jamison
 
 /***********************************************
 *************SECTION-A-HEADERS******************
@@ -23,6 +23,7 @@
 #include <iostream>
 #include <limits>
 #include <map>
+#include <memory>
 #include <queue>
 #include <vector>
 
@@ -39,30 +40,98 @@
 class Node {
  public:
   int id;
+  int distance;
+  int fuel;
+  int version;
   bool is_charger;
+  std::vector<Node> history;
+  std::shared_ptr<Node> parent;
 
-  Node(int id, bool is_charger) : id(id), is_charger(is_charger) {};
-  bool operator<(const Node& n) const { return id < n.id; }
+  Node() {
+    id = -1;
+    distance = -1;
+    fuel = -1;
+    version = 0;
+    is_charger = false;
+  }
+  Node(int id, bool is_charger) : id(id), is_charger(is_charger) {
+    distance = std::numeric_limits<int>::max();
+    fuel = -1;
+    version = 0;
+    parent = nullptr;
+  }
+
+  bool operator<(const Node& n) const {
+    if (distance == n.distance) return id < n.id;
+    return distance < n.distance;
+  }
+  bool operator>(const Node& n) const { return n.id < id; }
+  bool operator==(const Node& n) const { return id == n.id && version == n.version; }
 };
 
 class Graph {
- public:
   std::vector<Node> nodes;
-  std::map<Node, std::map<Node, int>> graph;
+  std::vector<std::vector<int>> adj_matrix;
+  int max_chage, initial_charge = -1;
+  int start_id, end_id = -1;
 
-  Graph() {
-    nodes = std::vector<Node>();
-    graph = std::map<Node, std::map<Node, int>>();
+ public:
+  Graph(int num_nodes) {
+    nodes.resize(num_nodes);
+    adj_matrix.resize(num_nodes);
+    for (int i = 0; i < num_nodes; i++) {
+      adj_matrix[i].resize(num_nodes, -1);
+    }
   }
 
-  Graph(int num_nodes, int num_edges) {
-    nodes = std::vector<Node>(num_nodes);
-    graph = std::map<Node, std::map<Node, int>>();
+  void add_node(int id, bool is_charger) { nodes.push_back(Node(id, is_charger)); }
+
+  void add_edge(int u, int v, int weight) {
+    adj_matrix[u][v] = weight;
+    adj_matrix[v][u] = weight;
   }
 
-  void addEdge(Node u, Node v, int dist) {
-    graph[u][v] = dist;
-    graph[v][u] = dist;
+  bool is_neighbor(int u, int v) const { return adj_matrix[u][v] >= 0; }
+
+  static Graph initialize() {
+    int num_nodes, num_edges, max_charge, initial_charge = 0;
+    std::cin >> num_nodes >> num_edges >> max_charge >> initial_charge;
+
+    int start_id, end_id = 0;
+    std::cin >> start_id >> end_id;
+
+    Graph graph(num_nodes);
+    graph.max_chage = max_charge;
+    graph.initial_charge = initial_charge;
+    graph.start_id = start_id;
+    graph.end_id = end_id;
+
+    for (int i = 0; i < num_nodes; i++) {
+      bool is_charger = false;
+      int id = 0;
+      std::cin >> id >> is_charger;
+      graph.nodes[id] = Node(id, is_charger);
+    }
+
+    for (int i = 0; i < num_edges; i++) {
+      int u, v, weight = 0;
+      std::cin >> u >> v >> weight;
+      graph.add_edge(u, v, weight);
+    }
+
+    return graph;
+  }
+
+  friend std::ostream& operator<<(std::ostream& os, const Graph& g) {
+    for (auto& node : g.nodes) {
+      os << "Node: " << node.id << " Charger: " << node.is_charger << std::endl;
+      for (int i = 0; i < g.adj_matrix.size(); i++) {
+        if (g.is_neighbor(node.id, i)) {
+          os << "  Neighbor: " << i << " Weight: " << g.adj_matrix[node.id][i] << std::endl;
+        }
+      }
+    }
+    return os;
   }
 };
 
@@ -77,39 +146,8 @@ class Graph {
 // SECTION_C_START: write your main function here.
 
 int main(int argc, char** argv) {
-  int num_nodes, num_edges, max_range, initial_range = 0;
-  std::cin >> num_nodes >> num_edges >> max_range >> initial_range;
-
-  int start, end = 0;
-  std::cin >> start >> end;
-
-  std::vector<int> chargers(num_nodes);
-
-  for (int i = 0; i < num_nodes; i++) {
-    int id, is_charger = 0;
-    std::cin >> id >> is_charger;
-    chargers[id] = is_charger;
-  }
-
-  Graph graph(num_nodes, num_edges);
-
-  for (int i = 0; i < num_edges; i++) {
-    int u, v, dist = 0;
-    std::cin >> u >> v >> dist;
-
-    Node node_u(u, chargers[u]);
-    Node node_v(v, chargers[v]);
-
-    graph.addEdge(node_u, node_v, dist);
-  }
-
-  // // Structured binding C++17
-  // for (auto& [node, edges] : graph) {
-  //     std::cout << "Node " << node.id << " is a charger: " << node.charger << std::endl;
-  //     for (auto& [edge, dist] : edges) {
-  //         std::cout << "Edge to " << edge.id << " with distance " << dist << std::endl;
-  //     }
-  // }
+  Graph graph = Graph::initialize();
+  std::cout << graph << std::endl;
 }
 
 // SECTION_C_END: Section C ends here.

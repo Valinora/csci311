@@ -25,6 +25,7 @@
 #include <map>
 #include <memory>
 #include <queue>
+#include <stdexcept>
 #include <vector>
 
 // SECTION_A_END: Section A ends here.
@@ -49,7 +50,7 @@ class Node {
 
   Node() {
     id = -1;
-    distance = -1;
+    distance = std::numeric_limits<int>::max();
     fuel = -1;
     version = 0;
     is_charger = false;
@@ -72,21 +73,27 @@ class Node {
 class Graph {
   std::vector<Node> nodes;
   std::vector<std::vector<int>> adj_matrix;
-  int max_chage, initial_charge = -1;
+  int max_charge, initial_charge = -1;
   int start_id, end_id = -1;
 
  public:
   Graph(int num_nodes) {
     nodes.resize(num_nodes);
-    adj_matrix.resize(num_nodes);
-    for (int i = 0; i < num_nodes; i++) {
-      adj_matrix[i].resize(num_nodes, -1);
-    }
+    adj_matrix.resize(num_nodes, std::vector<int>(num_nodes, -1));
   }
 
-  void add_node(int id, bool is_charger) { nodes.push_back(Node(id, is_charger)); }
+  void add_node(int id, bool is_charger) {
+    if (id >= nodes.size()) {
+      nodes.resize(id + 1);
+    }
+    nodes[id] = Node(id, is_charger);
+  }
 
   void add_edge(int u, int v, int weight) {
+    if (u >= adj_matrix.size() || v >= adj_matrix.size()) {
+      throw std::out_of_range("Node id out of range");
+    }
+
     adj_matrix[u][v] = weight;
     adj_matrix[v][u] = weight;
   }
@@ -101,7 +108,7 @@ class Graph {
     std::cin >> start_id >> end_id;
 
     Graph graph(num_nodes);
-    graph.max_chage = max_charge;
+    graph.max_charge = max_charge;
     graph.initial_charge = initial_charge;
     graph.start_id = start_id;
     graph.end_id = end_id;

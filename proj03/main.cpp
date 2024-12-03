@@ -22,7 +22,6 @@
 
 #include <iostream>
 #include <limits>
-#include <map>
 #include <memory>
 #include <queue>
 #include <stdexcept>
@@ -68,6 +67,31 @@ class Node {
   }
   bool operator>(const Node& n) const { return n.id < id; }
   bool operator==(const Node& n) const { return id == n.id && version == n.version; }
+};
+
+class Path {
+ public:
+  std::vector<Node> nodes;
+  int total_distance = 0;
+  int start_id, end_id = -1;
+
+  Path() {}
+
+  void add_node(Node node, int distance) {
+    nodes.push_back(node);
+    total_distance += distance;
+  }
+
+  friend std::ostream& operator<<(std::ostream& os, const Path& path) {
+    os << path.total_distance << ": ";
+    for (auto& node : path.nodes) {
+      if (node.id == path.start_id || node.id == path.end_id || node.is_charger) {
+        os << node.id << " ";
+      }
+    }
+    os << std::endl;
+    return os;
+  }
 };
 
 class Graph {
@@ -129,6 +153,23 @@ class Graph {
     return graph;
   }
 
+  bool verify_path(const Path& path) {
+    if (path.nodes.empty()) return false;
+
+    int fuel = initial_charge;
+    for (int i = 0; i < path.nodes.size() - 1; i++) {
+      Node u = path.nodes[i];
+      Node v = path.nodes[i + 1];
+      if (!is_neighbor(u.id, v.id)) return false;
+
+      fuel -= adj_matrix[u.id][v.id];
+      if (fuel < 0) return false;
+      if (v.is_charger) fuel = max_charge;
+    }
+
+    return true;
+  }
+
   friend std::ostream& operator<<(std::ostream& os, const Graph& g) {
     for (auto& node : g.nodes) {
       os << "Node: " << node.id << " Charger: " << node.is_charger << std::endl;
@@ -155,6 +196,14 @@ class Graph {
 int main(int argc, char** argv) {
   Graph graph = Graph::initialize();
   std::cout << graph << std::endl;
+  Path path;
+  path.add_node(Node(0, true), 0);
+  path.add_node(Node(2, false), 49);
+  path.add_node(Node(4, true), 27);
+  path.add_node(Node(7, true), 57);
+  std::cout << path << std::endl;
+
+  std::cout << graph.verify_path(path) << std::endl;
 }
 
 // SECTION_C_END: Section C ends here.

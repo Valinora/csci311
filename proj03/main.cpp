@@ -111,9 +111,7 @@ class Graph {
     return neighbors;
   }
 
-  int weight(int u, int v) {
-    return adj_matrix[u][v];
-  }
+  int weight(int u, int v) { return adj_matrix[u][v]; }
 
   static Graph initialize() {
     int num_nodes, num_edges, max_charge, initial_charge = 0;
@@ -155,15 +153,14 @@ class Graph {
     pq.push(nodes[start_id]);
     int min_distance = std::numeric_limits<int>::max();
 
-
-    while(!pq.empty()) {
+    while (!pq.empty()) {
       Node current = pq.top();
       pq.pop();
 
       if (current.distance > min_distance) {
         break;
       }
-      
+
       current.history.push_back(current.id);
 
       if (current.id == end_id) {
@@ -195,8 +192,6 @@ class Graph {
           pq.push(neighbor);
         }
       }
-
-
     }
 
     return paths;
@@ -259,8 +254,8 @@ int main(int argc, char** argv) {
     int dist = 0;
     for (int i = 0; i < path.size() - 1; i++) {
       int u = path[i];
-      int v = path[i+1];
-      dist+= graph.adj_matrix[u][v];
+      int v = path[i + 1];
+      dist += graph.adj_matrix[u][v];
     }
     std::cout << dist << ": ";
     std::cout << path[0] << " ";
@@ -270,7 +265,7 @@ int main(int argc, char** argv) {
         std::cout << node.id << " ";
       }
     }
-    std::cout << path[path.size() -1 ] << " ";
+    std::cout << path[path.size() - 1] << " ";
     std::cout << std::endl;
   }
 }

@@ -23,6 +23,7 @@
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <ostream>
 #include <queue>
 #include <stdexcept>
 #include <vector>
@@ -44,7 +45,7 @@ class Node {
   int fuel;
   int version;
   bool is_charger;
-  std::vector<Node> history;
+  std::vector<int> history;
   std::shared_ptr<Node> parent;
 
   Node() {
@@ -69,38 +70,13 @@ class Node {
   bool operator==(const Node& n) const { return id == n.id && version == n.version; }
 };
 
-class Path {
- public:
-  std::vector<Node> nodes;
-  int total_distance = 0;
-  int start_id, end_id = -1;
-
-  Path() {}
-
-  void add_node(Node node, int distance) {
-    nodes.push_back(node);
-    total_distance += distance;
-  }
-
-  friend std::ostream& operator<<(std::ostream& os, const Path& path) {
-    os << path.total_distance << ": ";
-    for (auto& node : path.nodes) {
-      if (node.id == path.start_id || node.id == path.end_id || node.is_charger) {
-        os << node.id << " ";
-      }
-    }
-    os << std::endl;
-    return os;
-  }
-};
-
 class Graph {
+ public:
   std::vector<Node> nodes;
   std::vector<std::vector<int>> adj_matrix;
   int max_charge, initial_charge = -1;
   int start_id, end_id = -1;
 
- public:
   Graph(int num_nodes) {
     nodes.resize(num_nodes);
     adj_matrix.resize(num_nodes, std::vector<int>(num_nodes, -1));
@@ -123,6 +99,17 @@ class Graph {
   }
 
   bool is_neighbor(int u, int v) const { return adj_matrix[u][v] >= 0; }
+
+  std::vector<int> get_neighbors(int u) const {
+    std::vector<int> neighbors = {};
+    for (int i = 0; i < adj_matrix.size(); i++) {
+      if (is_neighbor(u, i)) {
+        neighbors.push_back(i);
+      }
+    }
+
+    return neighbors;
+  }
 
   static Graph initialize() {
     int num_nodes, num_edges, max_charge, initial_charge = 0;
@@ -153,13 +140,52 @@ class Graph {
     return graph;
   }
 
-  bool verify_path(const Path& path) {
-    if (path.nodes.empty()) return false;
+  std::vector<std::vector<int>> dijkstra() {
+    nodes[start_id].distance = 0;
+    nodes[start_id].fuel = initial_charge;
+
+    std::vector<std::vector<int>> paths = {};
+
+    // MinHeap
+    std::priority_queue<Node, std::vector<Node>, std::greater<Node>> pq;
+    pq.push(nodes[start_id]);
+
+
+    while(!pq.empty()) {
+      Node current = pq.top();
+      pq.pop();
+      current.history.push_back(current.id);
+
+      if (current.id == end_id) {
+        paths.push_back(current.history);
+        break;
+      }
+
+      auto neighbors = get_neighbors(current.id);
+
+
+      for (auto& neighbor_id : neighbors) {
+        Node& neighbor = nodes[neighbor_id];
+        if (neighbor.distance > current.distance + adj_matrix[current.id][neighbor_id]) {
+          neighbor.distance = current.distance + adj_matrix[current.id][neighbor_id];
+          neighbor.history = current.history;
+          pq.push(neighbor);
+        }
+      }
+
+
+    }
+
+    return paths;
+  }
+
+  bool verify_path(const std::vector<int>& path) {
+    if (path.empty()) return false;
 
     int fuel = initial_charge;
-    for (int i = 0; i < path.nodes.size() - 1; i++) {
-      Node u = path.nodes[i];
-      Node v = path.nodes[i + 1];
+    for (int i = 0; i < path.size() - 1; i++) {
+      Node u = nodes[path[i]];
+      Node v = nodes[path[i + 1]];
       if (!is_neighbor(u.id, v.id)) return false;
 
       fuel -= adj_matrix[u.id][v.id];
@@ -195,15 +221,26 @@ class Graph {
 
 int main(int argc, char** argv) {
   Graph graph = Graph::initialize();
-  std::cout << graph << std::endl;
-  Path path;
-  path.add_node(Node(0, true), 0);
-  path.add_node(Node(2, false), 49);
-  path.add_node(Node(4, true), 27);
-  path.add_node(Node(7, true), 57);
-  std::cout << path << std::endl;
 
-  std::cout << graph.verify_path(path) << std::endl;
+  auto paths = graph.dijkstra();
+
+
+  for (auto& path : paths) {
+    int dist = 0;
+    for (int i = 0; i < path.size() - 1; i++) {
+      int u = path[i];
+      int v = path[i+1];
+      dist+= graph.adj_matrix[u][v];
+    }
+    std::cout << dist << ": ";
+    for (auto& id : path) {
+      Node& node = graph.nodes[id];
+      if (node.id == graph.start_id || node.id == graph.end_id || node.is_charger) {
+        std::cout << node.id << " ";
+      }
+    }
+    std::cout << std::endl;
+  }
 }
 
 // SECTION_C_END: Section C ends here.

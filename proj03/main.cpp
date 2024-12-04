@@ -151,42 +151,46 @@ class Graph {
     // MinHeap
     std::priority_queue<Node, std::vector<Node>, std::greater<Node>> pq;
     pq.push(nodes[start_id]);
-    int min_distance = std::numeric_limits<int>::max();
 
     while (!pq.empty()) {
       Node current = pq.top();
       pq.pop();
 
-      if (current.distance > min_distance) {
-        break;
+      // Skip if we've already found a shorter path to this node with more fuel
+      if (nodes[current.id].distance < current.distance && nodes[current.id].fuel >= current.fuel) {
+        continue;
       }
+
+      nodes[current.id] = current;  // Update the node with the current state
 
       current.history.push_back(current.id);
 
       if (current.id == end_id) {
         paths.push_back(current.history);
-        min_distance = std::min(current.distance, min_distance);
-        break;
+        // Do not break here; continue searching for a potentially shorter path
+        continue;
       }
 
       auto neighbors = get_neighbors(current.id);
 
       for (auto& neighbor_id : neighbors) {
-        Node& neighbor = nodes[neighbor_id];
+        Node neighbor = nodes[neighbor_id];
         int travel_cost = weight(current.id, neighbor_id);
+
         if (travel_cost > current.fuel) {
-          continue;
+          continue;  // Not enough fuel to reach this neighbor
         }
 
-        int new_dist = current.distance + travel_cost;
+        int new_distance = current.distance + travel_cost;
         int new_fuel = current.fuel - travel_cost;
 
         if (neighbor.is_charger) {
-          new_fuel = max_charge;
+          new_fuel = max_charge;  // Recharge at the charging station
         }
 
-        if (neighbor.distance > new_dist || neighbor.fuel < new_fuel) {
-          neighbor.distance = new_dist;
+        // Check if we can improve the path to the neighbor
+        if (neighbor.distance > new_distance || neighbor.fuel < new_fuel) {
+          neighbor.distance = new_distance;
           neighbor.fuel = new_fuel;
           neighbor.history = current.history;
           pq.push(neighbor);
@@ -194,6 +198,7 @@ class Graph {
       }
     }
 
+    // Return the shortest path found
     return paths;
   }
 
@@ -247,9 +252,8 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  std::cout << paths.size() << std::endl;
-  std::cout << "Verify Path: " << graph.verify_path(paths[0]) << std::endl;
-
+  std::vector<int> shortest = {};
+  int shortest_dist = std::numeric_limits<int>::max();
   for (auto& path : paths) {
     int dist = 0;
     for (int i = 0; i < path.size() - 1; i++) {
@@ -257,17 +261,26 @@ int main(int argc, char** argv) {
       int v = path[i + 1];
       dist += graph.adj_matrix[u][v];
     }
-    std::cout << dist << ": ";
-    std::cout << path[0] << " ";
-    for (auto& id : path) {
-      Node& node = graph.nodes[id];
-      if (node.is_charger && node.id != graph.start_id && node.id != graph.end_id) {
-        std::cout << node.id << " ";
-      }
+
+    if (dist < shortest_dist) {
+      shortest_dist = dist;
+      shortest = path;
     }
-    std::cout << path[path.size() - 1] << " ";
-    std::cout << std::endl;
   }
+
+  // std::cout << paths.size() << std::endl;
+  std::cout << "Verify Path: " << graph.verify_path(paths[0]) << std::endl;
+
+  std::cout << shortest_dist << ": ";
+  std::cout << shortest[0] << " ";
+  for (auto& id : shortest) {
+    Node& node = graph.nodes[id];
+    if (node.is_charger && node.id != graph.start_id && node.id != graph.end_id) {
+      std::cout << node.id << " ";
+    }
+  }
+  std::cout << shortest[shortest.size() - 1] << " ";
+  std::cout << std::endl;
 }
 
 // SECTION_C_END: Section C ends here.

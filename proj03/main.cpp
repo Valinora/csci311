@@ -111,6 +111,10 @@ class Graph {
     return neighbors;
   }
 
+  int weight(int u, int v) {
+    return adj_matrix[u][v];
+  }
+
   static Graph initialize() {
     int num_nodes, num_edges, max_charge, initial_charge = 0;
     std::cin >> num_nodes >> num_edges >> max_charge >> initial_charge;
@@ -149,25 +153,44 @@ class Graph {
     // MinHeap
     std::priority_queue<Node, std::vector<Node>, std::greater<Node>> pq;
     pq.push(nodes[start_id]);
+    int min_distance = std::numeric_limits<int>::max();
 
 
     while(!pq.empty()) {
       Node current = pq.top();
       pq.pop();
+
+      if (current.distance > min_distance) {
+        break;
+      }
+      
       current.history.push_back(current.id);
 
       if (current.id == end_id) {
         paths.push_back(current.history);
+        min_distance = std::min(current.distance, min_distance);
         break;
       }
 
       auto neighbors = get_neighbors(current.id);
 
-
       for (auto& neighbor_id : neighbors) {
         Node& neighbor = nodes[neighbor_id];
-        if (neighbor.distance > current.distance + adj_matrix[current.id][neighbor_id]) {
-          neighbor.distance = current.distance + adj_matrix[current.id][neighbor_id];
+        int travel_cost = weight(current.id, neighbor_id);
+        if (travel_cost > current.fuel) {
+          continue;
+        }
+
+        int new_dist = current.distance + travel_cost;
+        int new_fuel = current.fuel - travel_cost;
+
+        if (neighbor.is_charger) {
+          new_fuel = max_charge;
+        }
+
+        if (neighbor.distance > new_dist || neighbor.fuel < new_fuel) {
+          neighbor.distance = new_dist;
+          neighbor.fuel = new_fuel;
           neighbor.history = current.history;
           pq.push(neighbor);
         }
@@ -224,6 +247,13 @@ int main(int argc, char** argv) {
 
   auto paths = graph.dijkstra();
 
+  if (paths.size() == 0) {
+    std::cout << "No suitable path from " << graph.start_id << " to " << graph.end_id << " exists" << std::endl;
+    return 0;
+  }
+
+  std::cout << paths.size() << std::endl;
+  std::cout << "Verify Path: " << graph.verify_path(paths[0]) << std::endl;
 
   for (auto& path : paths) {
     int dist = 0;
@@ -233,12 +263,14 @@ int main(int argc, char** argv) {
       dist+= graph.adj_matrix[u][v];
     }
     std::cout << dist << ": ";
+    std::cout << path[0] << " ";
     for (auto& id : path) {
       Node& node = graph.nodes[id];
-      if (node.id == graph.start_id || node.id == graph.end_id || node.is_charger) {
+      if (node.is_charger && node.id != graph.start_id && node.id != graph.end_id) {
         std::cout << node.id << " ";
       }
     }
+    std::cout << path[path.size() -1 ] << " ";
     std::cout << std::endl;
   }
 }
